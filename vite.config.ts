@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react()],
 
   // Use relative base path for Tauri builds to ensure assets load correctly
-  base: '',
+  base: './',
 
   // Ensure proper asset handling for Tauri
   build: {

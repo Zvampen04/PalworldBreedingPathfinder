@@ -1,1 +1,0 @@
-import{R as a,r as s,j as d}from"./index-C44N1bVH.js";import{T as m}from"./App-CjdM32UX.js";const n=({children:r,className:t="",...e})=>{const o=s.useContext(m)?.mode==="dark";return d.jsx("div",{className:`rounded-xl border shadow-xl transition-all duration-300 ${o?"bg-gray-800 border-gray-700":"bg-white border-gray-200"} ${t}`,...e,children:r})},b=a.memo(n);export{b as C};

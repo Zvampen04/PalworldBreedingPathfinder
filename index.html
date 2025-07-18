@@ -23,7 +23,7 @@
     </div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Simple debugging for Tauri environment
+      // Enhanced debugging for module loading
       const debugStatus = document.getElementById('debug-status');
       
       function updateDebug(message) {
@@ -35,12 +35,47 @@
       
       updateDebug('🚀 HTML loaded, waiting for React...');
       
+      // Track module script loading
+      const moduleScript = document.querySelector('script[src="/src/main.tsx"]');
+      if (moduleScript) {
+        updateDebug('📜 Found module script element');
+        
+        moduleScript.addEventListener('load', () => {
+          updateDebug('✅ Module script loaded successfully');
+        });
+        
+        moduleScript.addEventListener('error', (event) => {
+          updateDebug('❌ Module script failed to load');
+          updateDebug('   Error: ' + JSON.stringify({
+            type: event.type,
+            target: event.target?.src || 'unknown'
+          }));
+        });
+      } else {
+        updateDebug('❌ Module script element not found');
+      }
+      
+      // Enhanced error tracking
+      window.addEventListener('error', (event) => {
+        updateDebug('❌ Global Error: ' + event.message);
+        updateDebug('   File: ' + event.filename);
+        updateDebug('   Line: ' + event.lineno);
+        if (event.error) {
+          updateDebug('   Stack: ' + (event.error.stack || 'No stack').substring(0, 200));
+        }
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        updateDebug('❌ Unhandled Promise Rejection: ' + event.reason);
+      });
+      
       // Check if we're in a Tauri environment
       setTimeout(() => {
         updateDebug('🔍 Environment check:');
         updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'));
         updateDebug('   - window.TAURI: ' + (typeof window.TAURI !== 'undefined'));
         updateDebug('   - location.href: ' + window.location.href);
+        updateDebug('   - location.protocol: ' + window.location.protocol);
         
         // Check if Tauri APIs are available
         if (typeof window.__TAURI__ !== 'undefined') {
@@ -53,7 +88,34 @@
         updateDebug('📊 Module execution check:');
         updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
         updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+        
+        // Try to manually fetch the module to see if it's accessible
+        updateDebug('🔍 Testing module accessibility...');
+        fetch('/src/main.tsx')
+          .then(response => {
+            updateDebug('📥 Module fetch: ' + response.status + ' ' + response.statusText);
+            if (!response.ok) {
+              updateDebug('❌ Module not accessible via fetch');
+            } else {
+              updateDebug('✅ Module is accessible via fetch');
+            }
+          })
+          .catch(error => {
+            updateDebug('❌ Module fetch failed: ' + error.message);
+          });
       }, 1000);
+      
+      // Recheck execution after more time
+      setTimeout(() => {
+        updateDebug('🔄 Final check after 3 seconds:');
+        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
+        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+        
+        if (!window.mainTsxLoaded) {
+          updateDebug('⚠️ main.tsx still not executed after 3 seconds');
+          updateDebug('💡 This suggests the module script is not loading at all');
+        }
+      }, 3000);
     </script>
   </body>
 </html>
