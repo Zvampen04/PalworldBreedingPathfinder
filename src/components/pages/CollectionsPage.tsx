@@ -20,7 +20,7 @@ const Collections: React.FC = () => {
   const [showAddToCollectionModal, setShowAddToCollectionModal] = React.useState(false);
   const [pathToAdd, setPathToAdd] = React.useState<any | null>(null);
   const [dialog, setDialog] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [pendingCollectionId, setPendingCollectionId] = React.useState<string | null>(null);
+  // Removed unused state variable
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
 
@@ -44,14 +44,7 @@ const Collections: React.FC = () => {
 
   // Handler for actually adding the path to the selected collection
   const handleSelectCollection = (collectionId: string) => {
-    setPendingCollectionId(collectionId);
-    // Immediately add to collection and close modal
-    confirmAddToCollection(collectionId);
-  };
-
-  const confirmAddToCollection = (collectionId?: string) => {
-    const colId = collectionId || pendingCollectionId;
-    if (!pathToAdd || !colId) return;
+    if (!pathToAdd || !collectionId) return;
     // Always ensure the path is a favorite before adding to collection
     let favId = isFavoritedBySteps(
       pathToAdd.startParent || pathToAdd.start_parent,
@@ -59,25 +52,31 @@ const Collections: React.FC = () => {
       pathToAdd.steps
     );
     if (!favId) {
+      // Get the actual parent and child names from the path steps
+      const startStep = pathToAdd.steps.find((step: any) => step.type === 'start');
+      const finalStep = pathToAdd.steps.find((step: any) => step.is_final);
+      
+      const startParent = pathToAdd.startParent || pathToAdd.start_parent || startStep?.pal || 'Unknown Parent';
+      const targetChild = pathToAdd.targetChild || pathToAdd.target_child || finalStep?.result || 'Unknown Child';
+      
       // Add as favorite and get the new id
       favId = addFavorite({
-        name: `${pathToAdd.startParent || pathToAdd.start_parent} → ${pathToAdd.targetChild || pathToAdd.target_child}`,
-        startParent: pathToAdd.startParent || pathToAdd.start_parent,
-        targetChild: pathToAdd.targetChild || pathToAdd.target_child,
+        name: `${startParent} → ${targetChild}`,
+        startParent: startParent,
+        targetChild: targetChild,
         steps: pathToAdd.steps,
       });
     }
     // Add favorite ID to collection
-    const col = collections.find(c => c.id === colId);
+    const col = collections.find(c => c.id === collectionId);
     if (col && col.favoriteIds.includes(favId)) {
       setDialog({ message: 'Path already in collection.', type: 'error' });
     } else {
-      addPathToCollection(colId, favId);
+      addPathToCollection(collectionId, favId);
       setDialog({ message: 'Path added to collection!', type: 'success' });
     }
     setShowAddToCollectionModal(false);
     setPathToAdd(null);
-    setPendingCollectionId(null);
     setTimeout(() => setDialog(null), 2000);
   };
 

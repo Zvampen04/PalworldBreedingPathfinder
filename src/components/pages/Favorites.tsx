@@ -24,6 +24,8 @@ interface FavoritesProps {
    * @property handleSaveFavoriteName - Handler to save an edited favorite name.
    * @property handleCancelEditFavoriteName - Handler to cancel editing.
    * @property handleCombineWithFavorite - Handler to combine two favorites.
+   * @property handleStartCombining - Handler to start combining mode.
+   * @property handleCancelCombining - Handler to cancel combining mode.
    * @property handleFavoriteSelect - Handler to select a favorite.
    * @property onAddToCollection - Handler to add a favorite to a collection.
    * @property favoriteRefs - Refs for favorite DOM elements.
@@ -39,6 +41,8 @@ interface FavoritesProps {
   handleSaveFavoriteName: (fav: any) => void;
   handleCancelEditFavoriteName: () => void;
   handleCombineWithFavorite: (fav: any, otherId: string) => void;
+  handleStartCombining: (fav: any) => void;
+  handleCancelCombining: () => void;
   handleFavoriteSelect: (fav: any) => void;
   onAddToCollection: (fav: any) => void;
   favoriteRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
@@ -48,7 +52,7 @@ interface FavoritesProps {
 const Favorites: React.FC<FavoritesProps> = ({
   favorites, selectedFavoriteId, highlightedFavoriteId, editingFavoriteId, editingName, combiningFavoriteId,
   handleEditFavoriteName, handleSaveFavoriteName, handleCancelEditFavoriteName, handleCombineWithFavorite,
-  handleFavoriteSelect, onAddToCollection, favoriteRefs, onRemoveFavorite
+  handleStartCombining, handleCancelCombining, handleFavoriteSelect, onAddToCollection, favoriteRefs, onRemoveFavorite
 }) => {
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
@@ -131,32 +135,69 @@ const Favorites: React.FC<FavoritesProps> = ({
                   ) : (
                     <>
                       <Button variant="icon" size="sm" dark={isDark} className="ml-2 text-xs text-blue-500 hover:text-blue-700" title="Edit name" onClick={e => { e.stopPropagation(); handleEditFavoriteName(fav); }} aria-label={`Edit name for favorite path ${fav.customName?.trim() ? fav.customName : fav.name}`}>✏️</Button>
-                      <Button variant="icon" size="sm" dark={isDark} className="ml-1 text-xs text-purple-500 hover:text-purple-700" title="Combine with another path" onClick={e => { e.stopPropagation(); /* setCombiningFavoriteId(fav.id); */ }} aria-label={`Combine favorite path ${fav.customName?.trim() ? fav.customName : fav.name} with another`}>🔗 Combine</Button>
+                      <Button variant="secondary" size="sm" dark={isDark} className="ml-1 text-xs text-purple-600 hover:text-purple-700 border-purple-300 hover:border-purple-400" title="Combine with another path" onClick={e => { e.stopPropagation(); handleStartCombining(fav); }} aria-label={`Combine favorite path ${fav.customName?.trim() ? fav.customName : fav.name} with another`}>🔗 Combine</Button>
                     </>
                   )}
                 </div>
               </div>
               {combiningFavoriteId === fav.id && (
-                <div className="mb-2">
-                  <label className="block text-xs mb-1">Combine with:</label>
-                  <select
-                    className={`px-2 py-1 rounded border ${isDark ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-400 bg-white text-black'}`}
-                    onChange={e => {
-                      if (e.target.value) handleCombineWithFavorite(fav, e.target.value);
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Select compatible path...</option>
-                    {favorites.filter(other =>
+                <div 
+                  className="mb-2 p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                  onClick={e => e.stopPropagation()}
+                  onMouseDown={e => e.stopPropagation()}
+                >
+                  <label className="block text-sm font-medium mb-2 text-blue-800 dark:text-blue-200">Combine with compatible path:</label>
+                  {(() => {
+                    const compatiblePaths = favorites.filter(other =>
                       other.id !== fav.id &&
                       (other.startParent === fav.targetChild || other.targetChild === fav.startParent)
-                    ).map(other => (
-                      <option key={other.id} value={other.id}>
-                        {other.customName?.trim() ? other.customName : other.name}
-                      </option>
-                    ))}
-                  </select>
-                  <Button variant="secondary" size="sm" dark={isDark} className="ml-2 text-xs text-gray-500 hover:text-gray-700" onClick={e => { e.stopPropagation(); /* setCombiningFavoriteId(null); */ }} aria-label={`Cancel combining favorite path ${fav.customName?.trim() ? fav.customName : fav.name}`}>Cancel</Button>
+                    );
+                    
+                    if (compatiblePaths.length === 0) {
+                      return (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          No compatible paths found. A compatible path must have:
+                          <ul className="list-disc list-inside mt-1 ml-2">
+                            <li>Start parent matching this path's target child ({fav.targetChild})</li>
+                            <li>OR target child matching this path's start parent ({fav.startParent})</li>
+                          </ul>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <select
+                        className={`w-full px-3 py-2 rounded border ${isDark ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-400 bg-white text-black'}`}
+                        onChange={e => {
+                          e.stopPropagation();
+                          if (e.target.value) handleCombineWithFavorite(fav, e.target.value);
+                        }}
+                        onClick={e => e.stopPropagation()}
+                        onMouseDown={e => e.stopPropagation()}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Select compatible path...</option>
+                        {compatiblePaths.map(other => (
+                          <option key={other.id} value={other.id}>
+                            {other.customName?.trim() ? other.customName : other.name}
+                            {other.startParent === fav.targetChild ? ` (${other.startParent} → ${other.targetChild})` : ` (${other.startParent} → ${other.targetChild})`}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  })()}
+                  <div className="flex justify-end mt-2">
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      dark={isDark} 
+                      className="text-gray-500 hover:text-gray-700" 
+                      onClick={e => { e.stopPropagation(); handleCancelCombining(); }} 
+                      aria-label={`Cancel combining favorite path ${fav.customName?.trim() ? fav.customName : fav.name}`}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               )}
               <ExpandablePaths

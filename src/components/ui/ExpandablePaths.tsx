@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { 
-  addFavorite, 
-  removeFavorite, 
   isFavoritedBySteps,
   toggleStepCompletion, 
   getProgress,
@@ -10,6 +8,7 @@ import {
 import Step from '../ExpandablePaths/Step';
 import Button from './Button';
 import { ThemeContext } from '../context/ThemeContext';
+import { useFavorites } from '../context/FavoritesContext';
 
 export interface BreedingStep {
   type: 'start' | 'breed';
@@ -71,6 +70,7 @@ interface RecursiveGroupedPath {
 const ExpandablePaths: React.FC<ExpandablePathsProps> = ({ data, hideSummaryHeader = false, summaryHeaderText, onAddToCollection, bottomAction, onRemoveFavorite }) => {
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
+  const { addFavorite, removeFavorite } = useFavorites();
   const [favoriteIds, setFavoriteIds] = useState<{ [pathId: number]: string | null }>({});
   const [completedStepsMap, setCompletedStepsMap] = useState<{ [pathId: number]: Set<number> }>({});
 
@@ -120,16 +120,21 @@ const ExpandablePaths: React.FC<ExpandablePathsProps> = ({ data, hideSummaryHead
         onRemoveFavorite(path);
       }
     } else {
+      // Get the actual parent and child names from the path steps
+      const startStep = path.steps.find(step => step.type === 'start');
+      const finalStep = path.steps.find(step => step.is_final);
+      
+      const startParent = data.start_parent || startStep?.pal || 'Unknown Parent';
+      const targetChild = data.target_child || finalStep?.result || 'Unknown Child';
+      
       const newFavorite: Omit<FavoritePath, 'id' | 'dateAdded'> = {
-        name: `${data.start_parent} → ${data.target_child}`,
-        startParent: data.start_parent,
-        targetChild: data.target_child,
+        name: `${startParent} → ${targetChild}`,
+        startParent: startParent,
+        targetChild: targetChild,
         steps: path.steps
       };
       const id = addFavorite(newFavorite);
       setFavoriteIds(prev => ({ ...prev, [path.id]: id }));
-      // Dispatch custom event to update sidebar
-      window.dispatchEvent(new CustomEvent('favoritesUpdated'));
     }
   };
 
@@ -154,18 +159,18 @@ const ExpandablePaths: React.FC<ExpandablePathsProps> = ({ data, hideSummaryHead
       <div className="border-l-2 border-blue-200 pl-4 space-y-3 relative flex flex-col pb-14">
         <div className="absolute top-0 right-0 flex gap-2 z-10">
           <Button
-            onClick={() => handleFavorite(path)}
-            variant={favId ? 'danger' : 'icon'}
+            onClick={(e) => { e.stopPropagation(); handleFavorite(path); }}
+            variant={favId ? 'danger' : 'primary'}
             size="sm"
             dark={isDark}
             title={favId ? 'Remove from favorites' : 'Add to favorites'}
             aria-label={favId ? 'Remove from favorites' : 'Add to favorites'}
-            className=""
+            className={favId ? '' : 'shadow-lg hover:shadow-xl'}
           >
-            {favId ? '\u2b50' : '\u2606'}
+            {favId ? '\u2b50' : '⭐'}
           </Button>
           <Button
-            onClick={() => onAddToCollection && onAddToCollection(path)}
+            onClick={(e) => { e.stopPropagation(); onAddToCollection && onAddToCollection(path); }}
             variant="primary"
             size="sm"
             dark={isDark}

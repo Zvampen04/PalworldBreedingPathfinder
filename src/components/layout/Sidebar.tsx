@@ -4,7 +4,7 @@ import { useFavorites } from '../context/FavoritesContext';
 import Button from '../ui/Button';
 import { ThemeContext } from '../context/ThemeContext';
 
-export type SidebarSection = 'home' | 'favorites' | 'ongoing' | 'settings' | 'collections';
+export type SidebarSection = 'home' | 'favorites' | 'ongoing' | 'settings' | 'collections' | 'weaknesses';
 
 interface SidebarProps {
   currentSection: SidebarSection;
@@ -37,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'favorites' as SidebarSection, label: 'Favorites', icon: '⭐', count: favorites.length },
     { id: 'ongoing' as SidebarSection, label: 'Ongoing', icon: '🔄', count: ongoing.length },
     { id: 'collections' as SidebarSection, label: 'Collections', icon: '📚', count: null },
+    { id: 'weaknesses' as SidebarSection, label: 'Weaknesses', icon: '⚔️', count: null },
     { id: 'settings' as SidebarSection, label: 'Settings', icon: '⚙️', count: null }
   ], [favorites.length, ongoing.length]);
 

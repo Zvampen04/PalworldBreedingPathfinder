@@ -1,9 +1,12 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Command } from '@tauri-apps/plugin-shell';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import Sidebar, { SidebarSection } from './components/layout/Sidebar';
-import { FavoritePath, PathProgress, addFavorite, getOngoingPaths, isFavoritedBySteps, areStepsEqual } from './utils/storage';
+import { FavoritePath, PathProgress, isFavoritedBySteps } from './utils/storage';
+import { BreedingStep } from './components/ui/ExpandablePaths';
+import { CSVReader } from './utils/csvReader';
 import './App.css';
 import { FavoritesProvider, useFavorites } from './components/context/FavoritesContext';
 import { ThemeProvider } from './components/context/ThemeContext';
@@ -19,24 +22,26 @@ const Home = lazy(() => import('./components/pages/Home'));
 const Favorites = lazy(() => import('./components/pages/Favorites'));
 const Ongoing = lazy(() => import('./components/pages/Ongoing'));
 const CollectionsSection = lazy(() => import('./components/pages/CollectionsSection'));
+const Weaknesses = lazy(() => import('./components/pages/Weaknesses'));
 const Settings = lazy(() => import('./components/pages/Settings'));
 
 interface BreedingResult {
-  type: 'parent_lookup' | 'path_finding';
+  type: 'parent_lookup' | 'path_finding' | 'child_lookup';
   result: string;
   error?: string;
   jsonData?: any; // Parsed JSON data for expandable paths
 }
 
 function AppContent() {
-  const { favorites, collections, ongoing } = useFavorites();
+  const { favorites, collections, ongoing, removeFavorite, addFavorite, addPathToCollection } = useFavorites();
   // Separate state for lookup and pathfind modes
   const [lookupParent1, setLookupParent1] = useState<string>('');
   const [lookupParent2, setLookupParent2] = useState<string>('');
   const [pathfindParent1, setPathfindParent1] = useState<string>('');
   const [pathfindParent2, setPathfindParent2] = useState<string>('');
   const [pathfindTargetChild, setPathfindTargetChild] = useState<string>('');
-  const [mode, setMode] = useState<'lookup' | 'pathfind'>('lookup');
+  const [childLookupTarget, setChildLookupTarget] = useState<string>('');
+  const [mode, setMode] = useState<'lookup' | 'pathfind' | 'childlookup'>('lookup');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BreedingResult | null>(null);
   const [currentSection, setCurrentSection] = useState<SidebarSection>('home');
@@ -97,9 +102,9 @@ function AppContent() {
       setIsRunning(true);
       setProgressError(null);
       try {
-        await runScriptWithProgress('palworld_image_scraper.py', 'images');
-        await runScriptWithProgress('palworld_breeding_scraper.py', 'breeding data');
-        await runScriptWithProgress('palworld_fullCalc_scraper.py', 'full calc');
+        await runScriptWithProgress('binaries/image-scraper', 'images');
+        await runScriptWithProgress('binaries/breeding-scraper', 'breeding data');
+        await runScriptWithProgress('binaries/fullcalc-scraper', 'full calc');
         setProgress(null);
         alert('All data updated successfully!');
       } catch (e) {
@@ -112,7 +117,7 @@ function AppContent() {
       setIsRunning(true);
       setProgressError(null);
       try {
-        await runScriptWithProgress('palworld_image_scraper.py', 'images');
+        await runScriptWithProgress('binaries/image-scraper', 'images');
         setProgress(null);
         alert('Images updated successfully!');
       } catch (e) {
@@ -125,7 +130,7 @@ function AppContent() {
       setIsRunning(true);
       setProgressError(null);
       try {
-        await runScriptWithProgress('palworld_breeding_scraper.py', 'breeding data');
+        await runScriptWithProgress('binaries/breeding-scraper', 'breeding data');
         setProgress(null);
         alert('Breeding data updated successfully!');
       } catch (e) {
@@ -138,7 +143,7 @@ function AppContent() {
       setIsRunning(true);
       setProgressError(null);
       try {
-        await runScriptWithProgress('palworld_fullCalc_scraper.py', 'full calc');
+        await runScriptWithProgress('binaries/fullcalc-scraper', 'full calc');
         setProgress(null);
         alert('Full calculator updated successfully!');
       } catch (e) {
@@ -186,18 +191,63 @@ function AppContent() {
       let max = 0;
       setProgress({ current, max, label });
       
-      try {
-        const command = Command.sidecar(script, []);
-        const output = await command.execute();
-        
-        if (output.code === 0) {
-          console.log(`✅ Script ${script} completed successfully`);
-          resolve();
-        } else {
-          console.error(`❌ Script ${script} failed with exit code ${output.code}: ${output.stderr}`);
-          reject(new Error(`Script failed with exit code ${output.code}: ${output.stderr || 'Unknown error'}`));
+      // Listen for progress events from the Rust backend
+      const unlistenProgress = await listen('sidecar-progress', (event: any) => {
+        const { script: eventScript, current: eventCurrent, max: eventMax } = event.payload;
+        if (eventScript === script) {
+          current = eventCurrent;
+          max = eventMax;
+          setProgress({ current, max, label });
+          console.log(`📈 Progress update: ${current}/${max} for ${label}`);
         }
+      });
+      
+      // Listen for output events
+      const unlistenOutput = await listen('sidecar-output', (event: any) => {
+        const { script: eventScript, output } = event.payload;
+        if (eventScript === script) {
+          console.log(`📊 [${script}] ${output}`);
+        }
+      });
+      
+      // Listen for error events
+      const unlistenError = await listen('sidecar-error', (event: any) => {
+        const { script: eventScript, error } = event.payload;
+        if (eventScript === script) {
+          console.error(`❌ [${script}] ${error}`);
+        }
+      });
+      
+      // Listen for completion events
+      const unlistenComplete = await listen('sidecar-complete', (event: any) => {
+        const { script: eventScript, success, exit_code } = event.payload;
+        if (eventScript === script) {
+          // Clean up listeners
+          unlistenProgress();
+          unlistenOutput();
+          unlistenError();
+          unlistenComplete();
+          
+          if (success) {
+            console.log(`✅ Script ${script} completed successfully`);
+            resolve();
+          } else {
+            console.error(`❌ Script ${script} failed with exit code ${exit_code}`);
+            reject(new Error(`Script failed with exit code ${exit_code}`));
+          }
+        }
+      });
+      
+      try {
+        // Call the Rust command to run the sidecar
+        await invoke('run_sidecar_with_progress', { script, label });
       } catch (error) {
+        // Clean up listeners
+        unlistenProgress();
+        unlistenOutput();
+        unlistenError();
+        unlistenComplete();
+        
         console.error(`💥 Error running script ${script}:`, error);
         reject(error);
       }
@@ -209,7 +259,18 @@ function AppContent() {
     let parent1 = mode === 'lookup' ? lookupParent1 : pathfindParent1;
     let parent2 = mode === 'lookup' ? lookupParent2 : pathfindParent2;
     let targetChild = mode === 'pathfind' ? pathfindTargetChild : '';
-    if (!parent1 && !parent2 && !targetChild) {
+    let childLookupTargetValue = mode === 'childlookup' ? childLookupTarget : '';
+    
+    if (mode === 'childlookup' && !childLookupTargetValue) {
+      setResult({
+        type: 'child_lookup',
+        result: '',
+        error: 'Please provide a target child'
+      });
+      return;
+    }
+    
+    if (mode !== 'childlookup' && !parent1 && !parent2 && !targetChild) {
       setResult({
         type: 'parent_lookup',
         result: '',
@@ -222,12 +283,92 @@ function AppContent() {
     setResult(null);
 
     try {
-      let args: string[] = [];
+      // Handle lookup modes with direct CSV reading
       if (mode === 'lookup' && parent1 && parent2) {
-        // Parent lookup mode: -p1 "Parent1" -p2 "Parent2" --json
-        args = ['-p1', parent1, '-p2', parent2, '--json'];
-      } else if (mode === 'pathfind') {
-        // Pathfinding mode: (-p1 or -p2) and -c --json --max-paths N
+        // Parent lookup mode: use CSV directly
+        const child = await CSVReader.findChild(parent1, parent2);
+        if (child) {
+          setResult({
+            type: 'parent_lookup',
+            result: `${parent1} + ${parent2} = ${child}`,
+            jsonData: { child, parent1, parent2 }
+          });
+        } else {
+          setResult({
+            type: 'parent_lookup',
+            result: 'No breeding combination found',
+            jsonData: { child: null, parent1, parent2 }
+          });
+        }
+        setIsLoading(false);
+        return;
+      } else if (mode === 'childlookup' && childLookupTargetValue) {
+        // Child lookup mode: use CSV directly
+        const parents = await CSVReader.findParents(childLookupTargetValue);
+        if (parents.length > 0) {
+          // Format data for ExpandablePaths component
+          const paths = parents.map((parentCombo, index) => ({
+            id: index, // Use numeric ID for proper favorites integration
+            startParent: parentCombo.parent1,
+            targetChild: childLookupTargetValue,
+            steps: [
+              {
+                type: 'start',
+                pal: parentCombo.parent1,
+                step_number: 0
+              },
+              {
+                type: 'breed',
+                parents: `${parentCombo.parent1} + ${parentCombo.parent2}`,
+                result: childLookupTargetValue,
+                step_number: 1,
+                is_final: true
+              }
+            ],
+            totalSteps: 1,
+            totalBreedingSteps: 1
+          }));
+
+          setResult({
+            type: 'child_lookup',
+            result: `Found ${parents.length} parent combination(s) for ${childLookupTargetValue}`,
+            jsonData: {
+              success: true,
+              start_parent: parents[0]?.parent1 || '', // Use first parent as start_parent for consistency
+              target_child: childLookupTargetValue,
+              total_paths: paths.length,
+              min_steps: 1, // All child lookup paths are 1 step
+              paths: paths.map((path, index) => ({
+                type: 'single' as const,
+                path: {
+                  id: index,
+                  steps: path.steps,
+                  total_steps: 1
+                }
+              }))
+            }
+          });
+        } else {
+          setResult({
+            type: 'child_lookup',
+            result: 'No parent combinations found',
+            jsonData: { 
+              success: false,
+              start_parent: '',
+              target_child: childLookupTargetValue,
+              total_paths: 0,
+              min_steps: 0,
+              paths: [],
+              message: 'No parent combinations found for this child'
+            }
+          });
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Path finding mode still uses the Python script
+      if (mode === 'pathfind') {
         let maxSeconds = computationTime;
         if (customTime && !isNaN(Number(customTime))) {
           maxSeconds = Number(customTime);
@@ -245,77 +386,154 @@ function AppContent() {
           effectiveMaxPaths = 1000000; // Effectively unlimited
         }
         if (isNaN(effectiveMaxPaths)) effectiveMaxPaths = 20;
-        if ((parent1 || parent2) && targetChild) {
-          if (parent1) {
-            args = ['-p1', parent1, '-c', targetChild, '--json', '--max-paths', String(effectiveMaxPaths)];
-          } else {
-            args = ['-p2', parent2, '-c', targetChild, '--json', '--max-paths', String(effectiveMaxPaths)];
-          }
+        if (parent1 && targetChild) {
+          let args: string[] = [];
+          args = ['-p1', parent1, '-c', targetChild, '--json', '--max-paths', String(effectiveMaxPaths)];
           if (maxSeconds > 0) {
             args.push('--max-seconds', String(maxSeconds));
           }
-        } else {
-          throw new Error('For pathfinding, provide one parent and a target child');
-        }
-      } else {
-        throw new Error('Invalid parameter combination');
-      }
 
-      console.log(`🚀 Executing Python sidecar in ${mode} mode`);
-      console.log(`📝 Sidecar: binaries/breeding-path ${args.join(' ')}`);
-      console.log(`📋 Arguments:`, args);
+          console.log(`🚀 Executing Python sidecar in ${mode} mode`);
+          console.log(`📝 Sidecar: binaries/breeding-path ${args.join(' ')}`);
+          console.log(`📋 Arguments:`, args);
 
-      // Add extensive debugging for binary discovery
-      console.log(`🔍 DEBUGGING BINARY DISCOVERY:`);
-      console.log(`   Target binary: binaries/breeding-path (Tauri will auto-resolve to .exe on Windows)`);
-      console.log(`   Platform: ${navigator.platform}`);
-      console.log(`   User agent: ${navigator.userAgent}`);
-      
-      console.log(`📁 Tauri sidecar will automatically resolve the binary name based on platform`);
+          // Add extensive debugging for binary discovery
+          console.log(`🔍 DEBUGGING BINARY DISCOVERY:`);
+          console.log(`   Target binary: binaries/breeding-path (Tauri will auto-resolve to .exe on Windows)`);
+          console.log(`   Platform: ${navigator.platform}`);
+          console.log(`   User agent: ${navigator.userAgent}`);
+          
+          console.log(`📁 Tauri sidecar will automatically resolve the binary name based on platform`);
 
-      // Log command creation details
-      console.log(`⚙️ Creating sidecar command...`);
+          // Log command creation details
+          console.log(`⚙️ Creating sidecar command...`);
 
-      // Execute the sidecar using Tauri's sidecar API
-      const command = Command.sidecar('binaries/breeding-path', args);
-      console.log(`✅ Command object created successfully`);
-      console.log(`🎯 Executing command...`);
-      const output = await command.execute();
+          // Execute the sidecar using Tauri's sidecar API
+          const command = Command.sidecar('binaries/breeding-path', args);
+          console.log(`✅ Command object created successfully`);
+          console.log(`🎯 Executing command...`);
+          const output = await command.execute();
 
-      console.log(`🎉 Sidecar executed successfully`);
-      console.log(`📋 Exit code:`, output.code);
-      console.log(`📋 STDOUT:`, output.stdout);
-      console.log(`📋 STDERR:`, output.stderr);
-      
-      if (output.code === 0) {
-        try {
-          // Try to parse JSON response
-          const jsonResult = JSON.parse(output.stdout);
-          if (mode === 'lookup') {
-            setResult({
-              type: 'parent_lookup',
-              result: jsonResult.child ? `${parent1} + ${parent2} = ${jsonResult.child}` : 'No breeding combination found',
-              jsonData: jsonResult
-            });
+          console.log(`🎉 Sidecar executed successfully`);
+          console.log(`📋 Exit code:`, output.code);
+          console.log(`📋 STDOUT:`, output.stdout);
+          console.log(`📋 STDERR:`, output.stderr);
+          
+          if (output.code === 0) {
+            try {
+              // Try to parse JSON response
+              const jsonResult = JSON.parse(output.stdout);
+              
+              // Deduplicate paths if they exist
+              if (jsonResult.paths && Array.isArray(jsonResult.paths)) {
+                // First, collect all unique paths across all groups and singles
+                const allPaths = new Map<string, any>();
+                
+                const processPath = (path: any) => {
+                  if (path.type === 'single' && path.path) {
+                    // Create a unique key for this path based on breeding steps
+                    const breedingSteps = path.path.steps
+                      .filter((step: any) => step.type === 'breed')
+                      .map((step: any) => step.parents)
+                      .sort()
+                      .join('|');
+                    
+                    const startParent = path.path.steps.find((step: any) => step.type === 'start')?.pal || '';
+                    const pathKey = `${startParent}|${breedingSteps}`;
+                    
+                    if (!allPaths.has(pathKey)) {
+                      allPaths.set(pathKey, path);
+                    }
+                  }
+                };
+                
+                // Process all paths recursively
+                const processNode = (node: any) => {
+                  if (node.type === 'single') {
+                    processPath(node);
+                  } else if (node.type === 'group' && node.children) {
+                    node.children.forEach(processNode);
+                  }
+                };
+                
+                jsonResult.paths.forEach(processNode);
+                
+                // Now rebuild the structure with unique paths only
+                const uniquePaths = Array.from(allPaths.values());
+                
+                // If we have multiple unique paths, group them by common steps
+                if (uniquePaths.length > 1) {
+                  // Group by common breeding steps
+                  const groups = new Map<string, any[]>();
+                  
+                  uniquePaths.forEach(path => {
+                    const breedingSteps = path.path.steps
+                      .filter((step: any) => step.type === 'breed')
+                      .map((step: any) => step.parents)
+                      .sort()
+                      .join('|');
+                    
+                    if (!groups.has(breedingSteps)) {
+                      groups.set(breedingSteps, []);
+                    }
+                    groups.get(breedingSteps)!.push(path);
+                  });
+                  
+                  // Convert groups back to the expected format
+                  const deduplicatedPaths: any[] = [];
+                  
+                  groups.forEach((pathsInGroup) => {
+                    if (pathsInGroup.length === 1) {
+                      // Single path, no grouping needed
+                      deduplicatedPaths.push(pathsInGroup[0]);
+                    } else {
+                      // Multiple paths with same breeding steps, group them
+                      const commonSteps = pathsInGroup[0].path.steps.filter((step: any) => step.type === 'breed');
+                      deduplicatedPaths.push({
+                        type: 'group',
+                        common_steps: commonSteps,
+                        children: pathsInGroup,
+                        count: pathsInGroup.length
+                      });
+                    }
+                  });
+                  
+                  jsonResult.paths = deduplicatedPaths;
+                  jsonResult.total_paths = uniquePaths.length;
+                } else if (uniquePaths.length === 1) {
+                  // Single unique path
+                  jsonResult.paths = uniquePaths;
+                  jsonResult.total_paths = 1;
+                } else {
+                  // No paths
+                  jsonResult.paths = [];
+                  jsonResult.total_paths = 0;
+                }
+              }
+              
+              setResult({
+                type: 'path_finding',
+                result: output.stdout,
+                jsonData: jsonResult
+              });
+            } catch (parseError) {
+              setResult({
+                type: 'path_finding',
+                result: output.stdout
+              });
+            }
           } else {
             setResult({
               type: 'path_finding',
-              result: output.stdout,
-              jsonData: jsonResult
+              result: '',
+              error: `Sidecar failed with exit code ${output.code}: ${output.stderr || 'No error message'}`
             });
           }
-        } catch (parseError) {
-          setResult({
-            type: mode === 'lookup' ? 'parent_lookup' : 'path_finding',
-            result: output.stdout
-          });
+        } else {
+          throw new Error('For pathfinding, provide a parent and a target child');
         }
       } else {
-        setResult({
-          type: mode === 'lookup' ? 'parent_lookup' : 'path_finding',
-          result: '',
-          error: `Sidecar failed with exit code ${output.code}: ${output.stderr || 'No error message'}`
-        });
+        throw new Error('Invalid parameter combination');
       }
       
     } catch (error) {
@@ -345,7 +563,7 @@ function AppContent() {
       }
       
       setResult({
-        type: mode === 'lookup' ? 'parent_lookup' : 'path_finding',
+        type: mode === 'lookup' ? 'parent_lookup' : mode === 'childlookup' ? 'child_lookup' : 'path_finding',
         result: '',
         error: `Sidecar execution failed: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
       });
@@ -361,11 +579,12 @@ function AppContent() {
     setPathfindParent1('');
     setPathfindParent2('');
     setPathfindTargetChild('');
+    setChildLookupTarget('');
     setResult(null);
   };
 
   // Function to handle mode changes and clear results
-  const handleModeChange = (newMode: 'lookup' | 'pathfind') => {
+  const handleModeChange = (newMode: 'lookup' | 'pathfind' | 'childlookup') => {
     setMode(newMode);
     setResult(null); // Clear results when switching modes to prevent JSON plaintext display
   };
@@ -389,7 +608,7 @@ function AppContent() {
   };
 
   // Handler for removing a favorite and staying on the favorites page
-  const handleRemoveFavorite = (fav: any) => {
+  const handleRemoveFavorite = (_fav: any) => {
     // This function will be called when a favorite is removed from the favorites page
     // The favorite will already be removed by the ExpandablePaths component
     // We don't need to navigate away, just stay on the favorites page
@@ -461,20 +680,13 @@ function AppContent() {
     const newName = other.customName?.trim() ? other.customName : defaultName;
     const newCustomName = other.customName?.trim() ? other.customName : undefined;
     // Add the new favorite using addFavorite to get id/dateAdded
-    const newId = addFavorite({
+    addFavorite({
       name: newName,
       startParent,
       targetChild,
       steps: renumbered,
       customName: newCustomName,
     });
-
-  // Handler for loading more paths
-  const handleLoadMore = () => {
-    const newMax = maxPaths + 20;
-    setMaxPaths(newMax);
-    executeBreedingScript(newMax);
-  };
 
   // Fix favoriteRefs type
   const favoriteRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
@@ -485,15 +697,9 @@ function AppContent() {
     }
   }, [selectedFavoriteId]);
 
-    // Remove both old favorites and any duplicate of the new favorite (by steps)
-    let data = favorites.filter(f => f.id !== fav.id && f.id !== other.id && !areStepsEqual(f.steps, renumbered));
-    const newFav = favorites.find(f => f.id === newId);
-    if (newFav) data.push(newFav);
-    localStorage.setItem('palworld-breeding-data', JSON.stringify({
-      favorites: data,
-      progress: getOngoingPaths().reduce((acc: Record<string, PathProgress>, o) => { acc[o.favorite.id] = o.progress; return acc; }, {})
-    }));
-    window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+    // Remove both old favorites using context
+    removeFavorite(fav.id);
+    removeFavorite(other.id);
     setCombiningFavoriteId(null);
     showDialog('Paths combined!', 'success');
   }
@@ -507,24 +713,26 @@ function AppContent() {
   const handleSelectCollection = () => {
     if (!pathToAdd || !pendingCollectionId) return;
     // Always use the canonical favorite object for the collection
-    let favorite = null;
-    const favId = isFavoritedBySteps(pathToAdd.startParent, pathToAdd.targetChild, pathToAdd.steps);
-    if (favId) {
-      favorite = favorites.find(f => f.id === favId);
-    } else {
+    let favId = isFavoritedBySteps(pathToAdd.startParent, pathToAdd.targetChild, pathToAdd.steps);
+    if (!favId) {
+      // Get the actual parent and child names from the path steps
+      const startStep = pathToAdd.steps.find((step: BreedingStep) => step.type === 'start');
+      const finalStep = pathToAdd.steps.find((step: BreedingStep) => step.is_final);
+      
+      const startParent = pathToAdd.startParent || startStep?.pal || 'Unknown Parent';
+      const targetChild = pathToAdd.targetChild || finalStep?.result || 'Unknown Child';
+      
       // Create new favorite if not found
       const newFavorite = {
-        name: `${pathToAdd.startParent} → ${pathToAdd.targetChild}`,
-        startParent: pathToAdd.startParent,
-        targetChild: pathToAdd.targetChild,
+        name: `${startParent} → ${targetChild}`,
+        startParent: startParent,
+        targetChild: targetChild,
         steps: pathToAdd.steps,
       };
-      const newId = addFavorite(newFavorite);
-      favorite = favorites.find(f => f.id === newId);
-      window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+      favId = addFavorite(newFavorite);
     }
-    if (!favorite) return;
-    // Now handled by context mutators; just close modal and show dialog
+    // Add to collection
+    addPathToCollection(pendingCollectionId, favId);
     setShowAddToCollectionModal(false);
     setShowConfirmAddModal(false);
     setPathToAdd(null);
@@ -546,6 +754,14 @@ function AppContent() {
   function handleCancelEditFavoriteName() {
     setEditingFavoriteId(null);
     setEditingName('');
+  }
+
+  function handleStartCombining(fav: any) {
+    setCombiningFavoriteId(fav.id);
+  }
+
+  function handleCancelCombining() {
+    setCombiningFavoriteId(null);
   }
 
   return (
@@ -584,7 +800,6 @@ function AppContent() {
                   onUpdateAllData={() => window.dispatchEvent(new CustomEvent('updateAllData'))}
                   onUpdateImages={() => window.dispatchEvent(new CustomEvent('updateImages'))}
                   onUpdateBreeding={() => window.dispatchEvent(new CustomEvent('updateBreeding'))}
-                  onUpdateFullCalc={() => window.dispatchEvent(new CustomEvent('updateFullCalc'))}
                   onResetLocalStorage={() => window.dispatchEvent(new CustomEvent('resetLocalStorage'))}
                 />
               </Suspense>
@@ -600,10 +815,10 @@ function AppContent() {
                   setLookupParent2={setLookupParent2}
                   pathfindParent1={pathfindParent1}
                   setPathfindParent1={setPathfindParent1}
-                  pathfindParent2={pathfindParent2}
-                  setPathfindParent2={setPathfindParent2}
                   pathfindTargetChild={pathfindTargetChild}
                   setPathfindTargetChild={setPathfindTargetChild}
+                  childLookupTarget={childLookupTarget}
+                  setChildLookupTarget={setChildLookupTarget}
                   computationTime={computationTime}
                   setComputationTime={setComputationTime}
                   customTime={customTime}
@@ -638,6 +853,8 @@ function AppContent() {
                   handleSaveFavoriteName={handleSaveFavoriteName}
                   handleCancelEditFavoriteName={handleCancelEditFavoriteName}
                   handleCombineWithFavorite={handleCombineWithFavorite}
+                  handleStartCombining={handleStartCombining}
+                  handleCancelCombining={handleCancelCombining}
                   handleFavoriteSelect={handleFavoriteSelect}
                   onAddToCollection={handleAddToCollection}
                   favoriteRefs={favoriteRefs}
@@ -660,6 +877,11 @@ function AppContent() {
             {currentSection === 'collections' && (
               <Suspense fallback={<LoadingSpinner />}>
                 <CollectionsSection />
+              </Suspense>
+            )}
+            {currentSection === 'weaknesses' && (
+              <Suspense fallback={<LoadingSpinner />}>
+                <Weaknesses />
               </Suspense>
             )}
 

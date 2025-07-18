@@ -26,7 +26,8 @@ const Step: React.FC<StepProps> = ({ step, isLast = false, showCheckbox = false,
         <input
           type="checkbox"
           checked={isCompleted}
-          onChange={() => handleStepToggle(path, step.step_number)}
+          onChange={(e) => { e.stopPropagation(); handleStepToggle(path, step.step_number); }}
+          onClick={(e) => e.stopPropagation()}
           className="w-4 h-4 rounded border-2 focus:ring-2 focus:ring-blue-500"
           aria-checked={isCompleted}
           aria-label={`Mark step ${step.step_number} as completed for breeding path from ${step.parents} to ${step.result}`}

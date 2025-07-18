@@ -9,13 +9,12 @@ interface SettingsProps {
   onUpdateAllData: () => void;
   onUpdateImages: () => void;
   onUpdateBreeding: () => void;
-  onUpdateFullCalc: () => void;
   onResetLocalStorage: () => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({
   isRunning, progress, progressError,
-  onUpdateAllData, onUpdateImages, onUpdateBreeding, onUpdateFullCalc, onResetLocalStorage
+  onUpdateAllData, onUpdateImages, onUpdateBreeding, onResetLocalStorage
 }) => {
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
@@ -41,9 +40,6 @@ const Settings: React.FC<SettingsProps> = ({
         </Button>
         <Button className="w-full py-3 px-4 rounded-lg font-semibold transition" variant="primary" dark={isDark} onClick={onUpdateBreeding} disabled={isRunning}>
           Update Breeding Data Only
-        </Button>
-        <Button className="w-full py-3 px-4 rounded-lg font-semibold transition" variant="primary" dark={isDark} onClick={onUpdateFullCalc} disabled={isRunning}>
-          Update Full Calculator (CSV + Images)
         </Button>
         <Button className="w-full py-3 px-4 rounded-lg font-semibold transition" variant="danger" dark={isDark} onClick={onResetLocalStorage} disabled={isRunning}>
           Reset Local Storage (Favorites & Ongoing)

@@ -13,6 +13,21 @@
           "args": true
         },
         {
+          "name": "binaries/breeding-scraper",
+          "sidecar": true,
+          "args": true
+        },
+        {
+          "name": "binaries/image-scraper",
+          "sidecar": true,
+          "args": true
+        },
+        {
+          "name": "binaries/fullcalc-scraper",
+          "sidecar": true,
+          "args": true
+        },
+        {
           "name": "py",
           "cmd": "py",
           "args": [

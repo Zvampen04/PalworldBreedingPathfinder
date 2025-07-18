@@ -55,7 +55,10 @@
       "../public/Assets/**/*"
     ],
     "externalBin": [
-      "binaries/breeding-path"
+      "binaries/breeding-path",
+      "binaries/image-scraper",
+      "binaries/breeding-scraper",
+      "binaries/fullcalc-scraper"
     ]
   }
 }

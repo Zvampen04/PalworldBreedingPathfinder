@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useContext, useState, useEffect } from 'react';
 import ExpandablePaths from '../ui/ExpandablePaths';
 import Card from '../ui/Card';
 import { ThemeContext } from '../context/ThemeContext';

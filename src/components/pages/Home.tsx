@@ -46,18 +46,19 @@ interface HomeProps {
    * @property progress - Progress data for ongoing computation.
    * @property progressError - Error message for progress/computation.
    */
-  mode: 'lookup' | 'pathfind';
-  setMode: (mode: 'lookup' | 'pathfind') => void;
+  mode: 'lookup' | 'pathfind' | 'childlookup';
+  setMode: (mode: 'lookup' | 'pathfind' | 'childlookup') => void;
   lookupParent1: string;
   setLookupParent1: (v: string) => void;
   lookupParent2: string;
   setLookupParent2: (v: string) => void;
   pathfindParent1: string;
   setPathfindParent1: (v: string) => void;
-  pathfindParent2: string;
-  setPathfindParent2: (v: string) => void;
+
   pathfindTargetChild: string;
   setPathfindTargetChild: (v: string) => void;
+  childLookupTarget: string;
+  setChildLookupTarget: (v: string) => void;
   computationTime: number;
   setComputationTime: (n: number) => void;
   customTime: string;
@@ -80,7 +81,8 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({
   mode, setMode,
   lookupParent1, setLookupParent1, lookupParent2, setLookupParent2,
-  pathfindParent1, setPathfindParent1, pathfindParent2, setPathfindParent2, pathfindTargetChild, setPathfindTargetChild,
+  pathfindParent1, setPathfindParent1, pathfindTargetChild, setPathfindTargetChild,
+  childLookupTarget, setChildLookupTarget,
   computationTime, setComputationTime, customTime, setCustomTime,
   isLoading, result, maxPaths, setMaxPaths, maxPathsEnabled, setMaxPathsEnabled,
   onRun, onClear, onLoadMore, onAddToCollection, progress, progressError,
@@ -144,6 +146,28 @@ const Home: React.FC<HomeProps> = ({
               🎯 Path Finding
             </Button>
           </label>
+          <label className="flex items-center cursor-pointer">
+            <Radio
+              type="radio"
+              name="mode"
+              value="childlookup"
+              checked={mode === 'childlookup'}
+              onChange={(e) => setMode(e.target.value as 'lookup' | 'pathfind' | 'childlookup')}
+              className="sr-only"
+              theme={isDark ? 'dark' : 'light'}
+            />
+            <Button
+              type="button"
+              variant={mode === 'childlookup' ? 'primary' : 'secondary'}
+              size="lg"
+              dark={isDark}
+              className="px-6 py-3 rounded-lg font-semibold transition-all"
+              onClick={() => setMode('childlookup')}
+              aria-pressed={mode === 'childlookup'}
+            >
+              🔍 Child Lookup
+            </Button>
+          </label>
         </div>
       </div>
 
@@ -181,17 +205,7 @@ const Home: React.FC<HomeProps> = ({
                 value={pathfindParent1}
                 onChange={setPathfindParent1}
                 palList={palList}
-                required={false}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="col-span-1 mb-4">
-              <PalSelector
-                label="Parent 2 (Optional)"
-                value={pathfindParent2}
-                onChange={setPathfindParent2}
-                palList={palList}
-                required={false}
+                required
                 disabled={isLoading}
               />
             </div>
@@ -206,6 +220,18 @@ const Home: React.FC<HomeProps> = ({
               />
             </div>
           </>
+        )}
+        {mode === 'childlookup' && (
+          <div className="col-span-1 mb-4">
+            <PalSelector
+              label="Target Child"
+              value={childLookupTarget}
+              onChange={setChildLookupTarget}
+              palList={palList}
+              required
+              disabled={isLoading}
+            />
+          </div>
         )}
       </div>
 
@@ -288,13 +314,17 @@ const Home: React.FC<HomeProps> = ({
       <div className="flex flex-wrap gap-4 justify-center mb-8">
         <Button
           onClick={onRun}
-          disabled={mode === 'lookup' ? (!lookupParent1 || !lookupParent2) : (isLoading || (!pathfindParent1 && !pathfindParent2))}
+          disabled={
+            mode === 'lookup' ? (!lookupParent1 || !lookupParent2) : 
+            mode === 'childlookup' ? (!childLookupTarget) :
+            (isLoading || !pathfindParent1 || !pathfindTargetChild)
+          }
           variant="primary"
           size="lg"
           loading={isLoading}
           dark={isDark}
         >
-          {isLoading ? 'Calculating...' : `${mode === 'lookup' ? 'Find Child' : 'Find Paths'}`}
+          {isLoading ? 'Calculating...' : `${mode === 'lookup' ? 'Find Child' : mode === 'childlookup' ? 'Find Parents' : 'Find Paths'}`}
         </Button>
         <Button
           onClick={onClear}
@@ -311,6 +341,19 @@ const Home: React.FC<HomeProps> = ({
         <div className="mt-8 text-center">
           <div className={`text-2xl font-bold ${isDark ? 'text-green-200' : 'text-green-800'}`}>Breeding Result</div>
           <div className={`mt-4 text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{result.result}</div>
+        </div>
+      )}
+      {mode === 'childlookup' && result && !isLoading && result.type === 'child_lookup' && result.jsonData && (
+        <div className="mt-8">
+          <div className={`text-2xl font-bold text-center mb-6 ${isDark ? 'text-green-200' : 'text-green-800'}`}>
+            Parent Combinations for {result.jsonData.target_child}
+          </div>
+          <ExpandablePaths
+            data={result.jsonData}
+            maxPaths={result.jsonData.total_paths}
+            onLoadMore={() => {}} // No more paths to load for child lookup
+            onAddToCollection={onAddToCollection}
+          />
         </div>
       )}
       {mode === 'pathfind' && result && !isLoading && result.type === 'path_finding' && result.jsonData && (
