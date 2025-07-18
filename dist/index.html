@@ -5,8 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Palworld Breeding Calculator</title>
-    <script type="module" crossorigin src="./assets/index-Jt5uIw7e.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DYkInSIr.css">
+    <script type="module" crossorigin src="./assets/index-D4x1xvc9.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B6FpfKjJ.css">
   </head>
 
   <body>
@@ -24,6 +24,43 @@
       </div>
     </div>
     <script>
+      // Enhanced debugging to catch module loading failures
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        console.log('🌐 Fetch request:', args[0]);
+        return originalFetch.apply(this, arguments)
+          .then(response => {
+            console.log('📥 Fetch response:', args[0], response.status, response.statusText);
+            return response;
+          })
+          .catch(error => {
+            console.error('❌ Fetch error:', args[0], error);
+            throw error;
+          });
+      };
+
+      // Override module loading to catch errors
+      const moduleErrors = [];
+      const originalImport = window.__import__ || function() {};
+      
+      // Capture any uncaught module errors
+      window.addEventListener('error', (event) => {
+        if (event.filename && event.filename.includes('assets/index-')) {
+          updateDebug('🚨 MODULE ERROR DETECTED:');
+          updateDebug('   File: ' + event.filename);
+          updateDebug('   Message: ' + (event.message || 'Unknown'));
+          updateDebug('   Line: ' + (event.lineno || 'unknown'));
+          updateDebug('   Column: ' + (event.colno || 'unknown'));
+          if (event.error) {
+            updateDebug('   Error name: ' + (event.error.name || 'unknown'));
+            updateDebug('   Error message: ' + (event.error.message || 'unknown'));
+            if (event.error.stack) {
+              updateDebug('   Stack trace: ' + event.error.stack.substring(0, 300) + '...');
+            }
+          }
+        }
+      }, true); // Use capture phase to catch early
+      
       // Debug script to help identify loading issues
       const debugStatus = document.getElementById('debug-status');
       
@@ -47,21 +84,67 @@
       // Check for errors
       window.addEventListener('error', (event) => {
         updateDebug('❌ Error: ' + event.error?.message || 'Unknown error');
+        updateDebug('   File: ' + (event.filename || 'unknown'));
+        updateDebug('   Line: ' + (event.lineno || 'unknown'));
+        updateDebug('   Column: ' + (event.colno || 'unknown'));
+        if (event.error?.stack) {
+          updateDebug('   Stack: ' + event.error.stack.substring(0, 200) + '...');
+        }
       });
       
       window.addEventListener('unhandledrejection', (event) => {
         updateDebug('❌ Unhandled promise rejection: ' + event.reason);
+        if (typeof event.reason === 'object' && event.reason?.stack) {
+          updateDebug('   Stack: ' + event.reason.stack.substring(0, 200) + '...');
+        }
       });
+
+      // Track module loading errors specifically
+      window.moduleErrors = [];
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        window.moduleErrors.push(args.join(' '));
+        updateDebug('🚨 Console Error: ' + args.join(' '));
+        originalConsoleError.apply(console, args);
+      };
       
       // Check if React loads
       setTimeout(() => {
         updateDebug('⏰ 5 seconds passed - checking if React loaded...');
-        if (document.querySelector('#root').children.length === 1) {
+        const rootElement = document.querySelector('#root');
+        if (rootElement.children.length === 1) {
           updateDebug('⚠️ Still on loading screen - React may not have loaded');
+          updateDebug('🔍 Root element children count: ' + rootElement.children.length);
+          updateDebug('🔍 Root element HTML: ' + rootElement.innerHTML.substring(0, 200) + '...');
         } else {
           updateDebug('✅ React appears to have loaded');
+          updateDebug('🔍 Root element children count: ' + rootElement.children.length);
         }
       }, 5000);
+
+      // Add more detailed script loading monitoring
+      setTimeout(() => {
+        updateDebug('🔬 DETAILED SCRIPT ANALYSIS:');
+        const scripts = document.querySelectorAll('script[type="module"]');
+        scripts.forEach((script, index) => {
+          updateDebug(`   Module Script ${index}:`);
+          updateDebug(`     - src: ${script.src}`);
+          updateDebug(`     - loaded: ${script.readyState || 'unknown'}`);
+          updateDebug(`     - crossOrigin: ${script.crossOrigin}`);
+        });
+        
+        // Check if any modules are in the global scope
+        updateDebug('🌐 Global scope analysis:');
+        updateDebug('   - React in global: ' + (typeof window.React !== 'undefined'));
+        updateDebug('   - ReactDOM in global: ' + (typeof window.ReactDOM !== 'undefined'));
+        updateDebug('   - Module errors: ' + (window.moduleErrors || 'none'));
+        
+        // Check browser capabilities
+        updateDebug('🌐 Browser capabilities:');
+        updateDebug('   - ES6 modules supported: ' + ('noModule' in HTMLScriptElement.prototype));
+        updateDebug('   - Script type=module supported: ' + (HTMLScriptElement.prototype.hasOwnProperty('type')));
+        
+      }, 2000);
       
       // Check if the main JS file loaded
       const scriptElement = document.querySelector('script[src*="index-"]');
@@ -80,6 +163,34 @@
         fetch(scriptElement.src)
           .then(response => {
             updateDebug('✅ Script fetch successful: ' + response.status + ' ' + response.statusText);
+            
+            // Try to read the script content to check for issues
+            return response.text();
+          })
+          .then(scriptContent => {
+            updateDebug('📄 Script content length: ' + scriptContent.length + ' characters');
+            updateDebug('📄 Script starts with: ' + scriptContent.substring(0, 100) + '...');
+            
+            // Check for common issues
+            if (scriptContent.includes('import')) {
+              updateDebug('✅ Script contains import statements');
+            } else {
+              updateDebug('⚠️ Script does not contain import statements');
+            }
+            
+            if (scriptContent.includes('mainTsxLoaded')) {
+              updateDebug('✅ Script contains mainTsxLoaded flag');
+            } else {
+              updateDebug('⚠️ Script missing mainTsxLoaded flag');
+            }
+            
+            // Check for syntax errors by trying to create a new Function
+            try {
+              new Function(scriptContent);
+              updateDebug('✅ Script syntax appears valid');
+            } catch (syntaxError) {
+              updateDebug('❌ Script syntax error: ' + syntaxError.message);
+            }
           })
           .catch(error => {
             updateDebug('❌ Script fetch failed: ' + error.message);
@@ -107,10 +218,62 @@
       setTimeout(() => {
         updateDebug('🔍 Environment check:');
         updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'));
+        updateDebug('   - window.TAURI: ' + (typeof window.TAURI !== 'undefined'));
         updateDebug('   - location.href: ' + window.location.href);
         updateDebug('   - location.protocol: ' + window.location.protocol);
         updateDebug('   - location.hostname: ' + window.location.hostname);
         updateDebug('   - location.pathname: ' + window.location.pathname);
+        
+        // Check if Tauri APIs are available
+        if (typeof window.__TAURI__ !== 'undefined') {
+          updateDebug('✅ Tauri APIs available');
+          try {
+            updateDebug('   - invoke: ' + (typeof window.__TAURI__.invoke !== 'undefined'));
+            updateDebug('   - event: ' + (typeof window.__TAURI__.event !== 'undefined'));
+          } catch (e) {
+            updateDebug('   - Error accessing Tauri APIs: ' + e.message);
+          }
+        } else {
+          updateDebug('❌ Tauri APIs not available - this might cause React to fail');
+          updateDebug('   This could be why the app works in dev but not in build');
+        }
+        
+        // Check if the script has actually executed
+        updateDebug('📊 Module execution check:');
+        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
+        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+        
+        // Check for any module loading in progress
+        setTimeout(() => {
+          updateDebug('🔄 Re-checking after 3 more seconds...');
+          updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
+          updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+          
+          // Try to manually trigger the module if it hasn't loaded
+          if (!window.mainTsxLoaded) {
+            updateDebug('🔧 Attempting manual module evaluation...');
+            const script = document.querySelector('script[src*="index-"]');
+            if (script) {
+              fetch(script.src)
+                .then(response => response.text())
+                .then(code => {
+                  updateDebug('📝 Attempting to evaluate module manually...');
+                  try {
+                    // Create a new script element with the content
+                    const newScript = document.createElement('script');
+                    newScript.type = 'module';
+                    newScript.textContent = code;
+                    document.head.appendChild(newScript);
+                    updateDebug('✅ Manual script injection attempted');
+                  } catch (evalError) {
+                    updateDebug('❌ Manual evaluation failed: ' + evalError.message);
+                  }
+                })
+                .catch(err => updateDebug('❌ Could not fetch for manual eval: ' + err.message));
+            }
+          }
+        }, 3000);
+        
       }, 1000);
     </script>
   </body>
