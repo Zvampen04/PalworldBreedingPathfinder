@@ -689,15 +689,6 @@ function AppContent() {
       customName: newCustomName,
     });
 
-  // Fix favoriteRefs type
-  const favoriteRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    if (selectedFavoriteId && favoriteRefs.current[selectedFavoriteId]) {
-      favoriteRefs.current[selectedFavoriteId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [selectedFavoriteId]);
-
     // Remove both old favorites using context
     removeFavorite(fav.id);
     removeFavorite(other.id);

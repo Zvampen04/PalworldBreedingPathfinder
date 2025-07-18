@@ -106,6 +106,7 @@
       setTimeout(() => {
         updateDebug('🔍 Environment check:');
         updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'));
+        updateDebug('   - window.TAURI: ' + (typeof window.TAURI !== 'undefined'));
         updateDebug('   - location.href: ' + window.location.href);
         updateDebug('   - location.protocol: ' + window.location.protocol);
         updateDebug('   - location.hostname: ' + window.location.hostname);
