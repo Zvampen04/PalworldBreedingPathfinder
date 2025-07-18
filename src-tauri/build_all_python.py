@@ -146,9 +146,10 @@ class PythonBinaryBuilder:
                 '--console',  # Console application
                 '--name', f"{binary_name}-{self.target_triple}",  # Platform-specific name
                 '--distpath', str(self.dist_dir),
-                '--workpath', str(self.build_dir),
+                '--workpath', str(self.build_dir / f"{binary_name}-{self.target_triple}"),  # Use unique workpath per binary
                 '--specpath', str(self.script_dir),
                 '--noconfirm',  # Overwrite without asking
+                '--clean',  # Clean cache before building
                 str(source_path)
             ]
             
@@ -177,7 +178,7 @@ class PythonBinaryBuilder:
                 
                 # For the primary binary, create Tauri-expected naming
                 if is_primary:
-                    tauri_binary_name = f"{binary_name}{self.extension}-{self.target_triple}{self.extension}"
+                    tauri_binary_name = f"{binary_name}-{self.target_triple}{self.extension}"
                     tauri_dest = self.binaries_dir / tauri_binary_name
                     shutil.copy2(source_binary, tauri_dest)
                     print(f"✅ Created Tauri binary: {tauri_dest.name}")

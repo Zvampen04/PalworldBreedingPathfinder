@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "build-sidecar": "node src-tauri/build-sidecar.js",
-    "build-all-python": "python src-tauri/build_all_python.py"
+    "build-all-python": "python src-tauri/build_all_python.py",
+    "prebuild": "npm run build-all-python",
+    "tauri:build": "npm run build-all-python && tauri build"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

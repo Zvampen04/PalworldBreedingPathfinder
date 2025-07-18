@@ -61,7 +61,11 @@ npm run tauri dev
 
 #### Production Build
 ```bash
-# Build for production
+# Build for production (includes Python binaries)
+npm run tauri:build
+
+# Or build Python binaries separately first, then Tauri
+npm run build-all-python
 npm run tauri build
 ```
 
@@ -109,8 +113,10 @@ npm run tauri dev          # Start development server
 npm run dev                # Start Vite dev server only
 
 # Building
-npm run tauri build        # Build for production
+npm run tauri:build        # Build for production (includes Python binaries)
+npm run tauri build        # Build Tauri app only
 npm run build              # Build frontend only
+npm run build-all-python   # Build Python sidecar binaries
 
 # Utilities
 npm run lint               # Run ESLint

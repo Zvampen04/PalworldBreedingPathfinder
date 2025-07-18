@@ -3,6 +3,10 @@ use std::fs;
 use std::path::Path;
 
 fn main() {
+    // Note: Python binaries are now built via npm scripts before Tauri build
+    // This prevents duplicate execution and ensures proper build order
+    println!("cargo:warning=Python binaries should be built via 'npm run build-all-python' before Tauri build");
+    
     // Get the assets directory path
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let assets_path = Path::new(&manifest_dir).join("Assets");

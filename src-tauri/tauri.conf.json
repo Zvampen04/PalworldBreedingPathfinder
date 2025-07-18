@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self';",
       "capabilities": [
         {
           "identifier": "main-capability",
@@ -52,7 +52,8 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "../public/Assets/**/*"
+      "../public/Assets/**/*",
+      "../dist/**/*"
     ],
     "externalBin": [
       "binaries/breeding-path",

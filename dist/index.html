@@ -2,14 +2,116 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + React + Typescript</title>
-    <script type="module" crossorigin src="/assets/index-DUbUAhxO.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DQbcZkdF.css">
+    <title>Palworld Breeding Calculator</title>
+    <script type="module" crossorigin src="./assets/index-Jt5uIw7e.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DYkInSIr.css">
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Loading fallback -->
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-align: center;">
+          <h2>Loading Palworld Breeding Calculator...</h2>
+          <p>If this message persists, please check the console for errors.</p>
+          <div id="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; text-align: left; max-width: 400px;">
+            <strong>Debug Info:</strong><br>
+            <span id="debug-status">Initializing...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Debug script to help identify loading issues
+      const debugStatus = document.getElementById('debug-status');
+      
+      function updateDebug(message) {
+        console.log(message);
+        if (debugStatus) {
+          debugStatus.innerHTML += '<br>' + message;
+        }
+      }
+      
+      updateDebug('🚀 HTML loaded, waiting for React...');
+      
+      window.addEventListener('load', () => {
+        updateDebug('📄 Window loaded');
+      });
+      
+      window.addEventListener('DOMContentLoaded', () => {
+        updateDebug('📄 DOM content loaded');
+      });
+      
+      // Check for errors
+      window.addEventListener('error', (event) => {
+        updateDebug('❌ Error: ' + event.error?.message || 'Unknown error');
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        updateDebug('❌ Unhandled promise rejection: ' + event.reason);
+      });
+      
+      // Check if React loads
+      setTimeout(() => {
+        updateDebug('⏰ 5 seconds passed - checking if React loaded...');
+        if (document.querySelector('#root').children.length === 1) {
+          updateDebug('⚠️ Still on loading screen - React may not have loaded');
+        } else {
+          updateDebug('✅ React appears to have loaded');
+        }
+      }, 5000);
+      
+      // Check if the main JS file loaded
+      const scriptElement = document.querySelector('script[src*="index-"]');
+      if (scriptElement) {
+        updateDebug('📜 Found React script element: ' + scriptElement.src);
+        updateDebug('🔍 Script element details:');
+        updateDebug('   - src: ' + scriptElement.src);
+        updateDebug('   - type: ' + scriptElement.type);
+        updateDebug('   - crossorigin: ' + scriptElement.crossOrigin);
+        
+        // Check if the URL is relative or absolute
+        const isRelative = !scriptElement.src.startsWith('http');
+        updateDebug('   - Is relative path: ' + isRelative);
+        
+        // Try to fetch the script to see what happens
+        fetch(scriptElement.src)
+          .then(response => {
+            updateDebug('✅ Script fetch successful: ' + response.status + ' ' + response.statusText);
+          })
+          .catch(error => {
+            updateDebug('❌ Script fetch failed: ' + error.message);
+          });
+        
+        scriptElement.addEventListener('load', () => {
+          updateDebug('✅ React script loaded successfully');
+        });
+        scriptElement.addEventListener('error', (event) => {
+          updateDebug('❌ React script failed to load');
+          updateDebug('   Error details: ' + JSON.stringify(event));
+        });
+      } else {
+        updateDebug('❌ React script element not found');
+      }
+      
+      // Check all script elements
+      const allScripts = document.querySelectorAll('script');
+      updateDebug('📋 All script elements found: ' + allScripts.length);
+      allScripts.forEach((script, index) => {
+        updateDebug('   Script ' + index + ': ' + (script.src || 'inline'));
+      });
+      
+      // Check if we're in a Tauri environment
+      setTimeout(() => {
+        updateDebug('🔍 Environment check:');
+        updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'));
+        updateDebug('   - location.href: ' + window.location.href);
+        updateDebug('   - location.protocol: ' + window.location.protocol);
+        updateDebug('   - location.hostname: ' + window.location.hostname);
+        updateDebug('   - location.pathname: ' + window.location.pathname);
+      }, 1000);
+    </script>
   </body>
 </html>

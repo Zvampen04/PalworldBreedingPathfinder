@@ -11,6 +11,7 @@ import './App.css';
 import { FavoritesProvider, useFavorites } from './components/context/FavoritesContext';
 import { ThemeProvider } from './components/context/ThemeContext';
 import Modal from './components/ui/Modal';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 // Remove direct imports of Home, Favorites, Ongoing, CollectionsSection, Settings
 // import Home from './components/pages/Home';
 // import Favorites from './components/pages/Favorites';
@@ -968,11 +969,57 @@ function AppContent() {
 }
 
 export default function App() {
+  // Add debugging for production builds
+  useEffect(() => {
+    console.log('🚀 App starting...');
+    console.log('Environment:', import.meta.env.MODE);
+    console.log('Base URL:', import.meta.env.BASE_URL);
+    console.log('User Agent:', navigator.userAgent);
+    
+    // Update debug info on the page
+    const debugStatus = document.getElementById('debug-status');
+    if (debugStatus) {
+      debugStatus.innerHTML += '<br>🚀 React App starting...';
+      debugStatus.innerHTML += '<br>Environment: ' + import.meta.env.MODE;
+      debugStatus.innerHTML += '<br>Base URL: ' + import.meta.env.BASE_URL;
+    }
+    
+    // Check if we're in a Tauri environment
+    if ((window as any).__TAURI__) {
+      console.log('✅ Tauri environment detected');
+      if (debugStatus) {
+        debugStatus.innerHTML += '<br>✅ Tauri environment detected';
+      }
+    } else {
+      console.log('⚠️  Not in Tauri environment');
+      if (debugStatus) {
+        debugStatus.innerHTML += '<br>⚠️  Not in Tauri environment';
+      }
+    }
+    
+    // Check for any errors
+    window.addEventListener('error', (event) => {
+      console.error('❌ Global error:', event.error);
+      if (debugStatus) {
+        debugStatus.innerHTML += '<br>❌ Global error: ' + (event.error?.message || 'Unknown error');
+      }
+    });
+    
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('❌ Unhandled promise rejection:', event.reason);
+      if (debugStatus) {
+        debugStatus.innerHTML += '<br>❌ Unhandled promise rejection: ' + event.reason;
+      }
+    });
+  }, []);
+
   return (
-    <ThemeProvider>
-      <FavoritesProvider>
-        <AppContent />
-      </FavoritesProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <FavoritesProvider>
+          <AppContent />
+        </FavoritesProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
