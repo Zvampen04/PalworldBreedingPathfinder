@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, useState, useRef, useEffect } from 'react';
 import ExpandablePaths from '../ui/ExpandablePaths';
 import Card from '../ui/Card';
 import { ThemeContext } from '../context/ThemeContext';
@@ -15,15 +15,34 @@ interface OngoingProps {
    * @property ongoing - List of ongoing favorite paths with progress.
    * @property handleOngoingSelect - Handler to select an ongoing path.
    * @property onAddToCollection - Handler to add a favorite to a collection.
+   * @property pulseItemId - ID of the item to pulse (for animation).
    */
   ongoing: any[];
   handleOngoingSelect: (item: any) => void;
   onAddToCollection: (fav: any) => void;
+  pulseItemId?: string | null;
 }
 
-const Ongoing: React.FC<OngoingProps> = ({ ongoing, handleOngoingSelect, onAddToCollection }) => {
+const Ongoing: React.FC<OngoingProps> = ({ ongoing, handleOngoingSelect, onAddToCollection, pulseItemId }) => {
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
+  const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
+  
+  // Handle pulse animation when pulseItemId changes
+  useEffect(() => {
+    if (pulseItemId) {
+      setAnimatingItems(prev => new Set(prev).add(pulseItemId));
+      const timer = setTimeout(() => {
+        setAnimatingItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(pulseItemId);
+          return newSet;
+        });
+      }, 2000); // Animation duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [pulseItemId]);
   const memoizedOngoing = useMemo(() => ongoing.map(item => {
     const totalSteps = item.favorite.steps.filter((s: any) => s.type !== 'start').length;
     const completedSteps = item.progress.completedSteps.size;
@@ -63,15 +82,23 @@ const Ongoing: React.FC<OngoingProps> = ({ ongoing, handleOngoingSelect, onAddTo
       {ongoing.length === 0 ? (
         <div className="text-center text-gray-400">No ongoing paths.</div>
       ) : (
-        memoizedOngoing.map(({ item, totalSteps, completedSteps, percent, data }) => (
-          <Card
-            key={item.favorite.id}
-            className={`flex flex-col gap-1 cursor-pointer transition group p-4 ${isDark ? 'bg-white/10 border border-gray-700' : 'bg-white border border-gray-300'}`}
-            onClick={() => handleOngoingSelect(item)}
-            tabIndex={0}
-            role="button"
-            aria-label={`Go to favorite path ${item.favorite.name || `${item.favorite.startParent} → ${item.favorite.targetChild}`}`}
-          >
+        memoizedOngoing.map(({ item, totalSteps, completedSteps, percent, data }) => {
+          const isAnimating = animatingItems.has(item.favorite.id);
+          return (
+            <Card
+              key={item.favorite.id}
+              className={`flex flex-col gap-1 cursor-pointer transition group p-4 ${
+                isDark ? 'bg-white/10 border border-gray-700' : 'bg-white border border-gray-300'
+              } ${
+                isAnimating 
+                  ? 'animate-pulse border-purple-400 bg-purple-900/20 shadow-lg shadow-purple-500/25' 
+                  : ''
+              }`}
+              onClick={() => handleOngoingSelect(item)}
+              tabIndex={0}
+              role="button"
+              aria-label={`Go to favorite path ${item.favorite.name || `${item.favorite.startParent} → ${item.favorite.targetChild}`}`}
+            >
             <div className={`font-semibold group-hover:text-blue-700 ${isDark ? 'dark:group-hover:text-purple-300' : ''} transition-colors duration-200`}>{item.favorite.name || `${item.favorite.startParent} → ${item.favorite.targetChild}`}</div>
             <div className="text-xs text-gray-400">{completedSteps}/{totalSteps} steps ({percent}%)</div>
             <ExpandablePaths
@@ -81,7 +108,8 @@ const Ongoing: React.FC<OngoingProps> = ({ ongoing, handleOngoingSelect, onAddTo
               onAddToCollection={onAddToCollection}
             />
           </Card>
-        ))
+          );
+        })
       )}
     </div>
   );

@@ -173,6 +173,34 @@ export const isFavorited = (startParent: string, targetChild: string): string | 
 };
 
 /**
+ * Compare two breeding steps for equality.
+ * @param step1 - First step to compare.
+ * @param step2 - Second step to compare.
+ * @returns True if steps are equal, false otherwise.
+ */
+export const areStepsEqual = (step1: any, step2: any): boolean => {
+  return step1.type === step2.type &&
+         step1.pal === step2.pal &&
+         step1.parents === step2.parents &&
+         step1.result === step2.result &&
+         step1.step_number === step2.step_number &&
+         step1.is_final === step2.is_final;
+};
+
+/**
+ * Compare two paths for equality based on startParent, targetChild, and steps.
+ * @param path1 - First path to compare.
+ * @param path2 - Second path to compare.
+ * @returns True if paths are equal, false otherwise.
+ */
+export const arePathsEqual = (path1: any, path2: any): boolean => {
+  return path1.startParent === path2.startParent &&
+         path1.targetChild === path2.targetChild &&
+         path1.steps.length === path2.steps.length &&
+         path1.steps.every((step: any, idx: number) => areStepsEqual(step, path2.steps[idx]));
+};
+
+/**
  * Check if a favorite exists for a specific path (by steps).
  * @param startParent - Name of the starting parent Pal.
  * @param targetChild - Name of the target child Pal.
@@ -181,20 +209,7 @@ export const isFavorited = (startParent: string, targetChild: string): string | 
  */
 export const isFavoritedBySteps = (startParent: string, targetChild: string, steps: Array<any>): string | null => {
   const favorites = getFavorites();
-  const found = favorites.find(fav =>
-    fav.startParent === startParent &&
-    fav.targetChild === targetChild &&
-    fav.steps.length === steps.length &&
-    fav.steps.every((step, idx) => {
-      const other = steps[idx];
-      return step.type === other.type &&
-        step.pal === other.pal &&
-        step.parents === other.parents &&
-        step.result === other.result &&
-        step.step_number === other.step_number &&
-        step.is_final === other.is_final;
-    })
-  );
+  const found = favorites.find(fav => arePathsEqual(fav, { startParent, targetChild, steps }));
   return found ? found.id : null;
 };
 

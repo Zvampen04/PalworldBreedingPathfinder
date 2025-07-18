@@ -3,7 +3,7 @@ import { Command } from '@tauri-apps/plugin-shell';
 import { invoke } from '@tauri-apps/api/core';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import Sidebar, { SidebarSection } from './components/layout/Sidebar';
-import { FavoritePath, PathProgress, addFavorite, getOngoingPaths, isFavoritedBySteps } from './utils/storage';
+import { FavoritePath, PathProgress, addFavorite, getOngoingPaths, isFavoritedBySteps, areStepsEqual } from './utils/storage';
 import './App.css';
 import { FavoritesProvider, useFavorites } from './components/context/FavoritesContext';
 import { ThemeProvider } from './components/context/ThemeContext';
@@ -58,6 +58,7 @@ function AppContent() {
   const [showConfirmAddModal, setShowConfirmAddModal] = useState(false);
   const [pendingCollectionId, setPendingCollectionId] = useState<string | null>(null);
   const [palList, setPalList] = useState<string[]>([]);
+  const [pulseOngoingItemId, setPulseOngoingItemId] = useState<string | null>(null);
 
   function showDialog(message: string, type: 'success' | 'error') {
     setDialog({ message, type });
@@ -180,12 +181,26 @@ function AppContent() {
 
   // Helper to run a script and update progress
   async function runScriptWithProgress(script: string, label: string) {
-    return new Promise<void>((_resolve, _reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       let current = 0;
       let max = 0;
       setProgress({ current, max, label });
-      const command = Command.sidecar(script, []);
-      command.execute(); // TODO: Update this call if arguments are needed, but fix for now to match expected signature
+      
+      try {
+        const command = Command.sidecar(script, []);
+        const output = await command.execute();
+        
+        if (output.code === 0) {
+          console.log(`✅ Script ${script} completed successfully`);
+          resolve();
+        } else {
+          console.error(`❌ Script ${script} failed with exit code ${output.code}: ${output.stderr}`);
+          reject(new Error(`Script failed with exit code ${output.code}: ${output.stderr || 'Unknown error'}`));
+        }
+      } catch (error) {
+        console.error(`💥 Error running script ${script}:`, error);
+        reject(error);
+      }
     });
   }
 
@@ -349,6 +364,12 @@ function AppContent() {
     setResult(null);
   };
 
+  // Function to handle mode changes and clear results
+  const handleModeChange = (newMode: 'lookup' | 'pathfind') => {
+    setMode(newMode);
+    setResult(null); // Clear results when switching modes to prevent JSON plaintext display
+  };
+
   const handleFavoriteSelect = (favorite: FavoritePath) => {
     setPathfindParent1(favorite.startParent);
     setPathfindTargetChild(favorite.targetChild);
@@ -361,6 +382,17 @@ function AppContent() {
     setCurrentSection('favorites');
     setSelectedFavoriteId(null);
     setTimeout(() => setSelectedFavoriteId(item.favorite.id), 0);
+    
+    // Trigger pulse animation in ongoing when going back
+    setPulseOngoingItemId(item.favorite.id);
+    setTimeout(() => setPulseOngoingItemId(null), 2000);
+  };
+
+  // Handler for removing a favorite and staying on the favorites page
+  const handleRemoveFavorite = (fav: any) => {
+    // This function will be called when a favorite is removed from the favorites page
+    // The favorite will already be removed by the ExpandablePaths component
+    // We don't need to navigate away, just stay on the favorites page
   };
 
   // Handler for loading more paths
@@ -379,14 +411,6 @@ function AppContent() {
     }
   }, [selectedFavoriteId]);
 
-  function areStepsEqual(a: any[], b: any[]) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; ++i) {
-      const s1 = a[i], s2 = b[i];
-      if (s1.type !== s2.type || s1.pal !== s2.pal || s1.parents !== s2.parents || s1.result !== s2.result) return false;
-    }
-    return true;
-  }
   function handleCombineWithFavorite(fav: FavoritePath, otherId: string) {
     const other = favorites.find(f => f.id === otherId);
     if (!other) return;
@@ -444,6 +468,23 @@ function AppContent() {
       steps: renumbered,
       customName: newCustomName,
     });
+
+  // Handler for loading more paths
+  const handleLoadMore = () => {
+    const newMax = maxPaths + 20;
+    setMaxPaths(newMax);
+    executeBreedingScript(newMax);
+  };
+
+  // Fix favoriteRefs type
+  const favoriteRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (selectedFavoriteId && favoriteRefs.current[selectedFavoriteId]) {
+      favoriteRefs.current[selectedFavoriteId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedFavoriteId]);
+
     // Remove both old favorites and any duplicate of the new favorite (by steps)
     let data = favorites.filter(f => f.id !== fav.id && f.id !== other.id && !areStepsEqual(f.steps, renumbered));
     const newFav = favorites.find(f => f.id === newId);
@@ -552,7 +593,7 @@ function AppContent() {
               <Suspense fallback={<LoadingSpinner />}>
                 <Home
                   mode={mode}
-                  setMode={setMode}
+                  setMode={handleModeChange}
                   lookupParent1={lookupParent1}
                   setLookupParent1={setLookupParent1}
                   lookupParent2={lookupParent2}
@@ -600,6 +641,7 @@ function AppContent() {
                   handleFavoriteSelect={handleFavoriteSelect}
                   onAddToCollection={handleAddToCollection}
                   favoriteRefs={favoriteRefs}
+                  onRemoveFavorite={handleRemoveFavorite}
                 />
               </Suspense>
             )}
@@ -610,6 +652,7 @@ function AppContent() {
                   ongoing={ongoing}
                   handleOngoingSelect={handleOngoingSelect}
                   onAddToCollection={handleAddToCollection}
+                  pulseItemId={pulseOngoingItemId}
                 />
               </Suspense>
             )}

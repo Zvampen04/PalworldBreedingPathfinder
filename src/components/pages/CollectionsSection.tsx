@@ -1,2 +1,2 @@
-const CollectionsSection = () => null;
-export default CollectionsSection; 
+// Re-export the Collections component as CollectionsSection
+export { default } from './CollectionsPage'; 

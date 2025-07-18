@@ -27,6 +27,7 @@ interface FavoritesProps {
    * @property handleFavoriteSelect - Handler to select a favorite.
    * @property onAddToCollection - Handler to add a favorite to a collection.
    * @property favoriteRefs - Refs for favorite DOM elements.
+   * @property onRemoveFavorite - Handler to remove a favorite.
    */
   favorites: any[];
   selectedFavoriteId: string | null;
@@ -41,12 +42,13 @@ interface FavoritesProps {
   handleFavoriteSelect: (fav: any) => void;
   onAddToCollection: (fav: any) => void;
   favoriteRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
+  onRemoveFavorite?: (fav: any) => void;
 }
 
 const Favorites: React.FC<FavoritesProps> = ({
   favorites, selectedFavoriteId, highlightedFavoriteId, editingFavoriteId, editingName, combiningFavoriteId,
   handleEditFavoriteName, handleSaveFavoriteName, handleCancelEditFavoriteName, handleCombineWithFavorite,
-  handleFavoriteSelect, onAddToCollection, favoriteRefs
+  handleFavoriteSelect, onAddToCollection, favoriteRefs, onRemoveFavorite
 }) => {
   const theme = useContext(ThemeContext);
   const isDark = theme?.mode === 'dark';
@@ -162,6 +164,7 @@ const Favorites: React.FC<FavoritesProps> = ({
                 maxPaths={1}
                 hideSummaryHeader={true}
                 onAddToCollection={() => onAddToCollection(fav)}
+                onRemoveFavorite={onRemoveFavorite ? () => onRemoveFavorite(fav) : undefined}
               />
             </Card>
           </div>
