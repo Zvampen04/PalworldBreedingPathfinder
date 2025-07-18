@@ -13,9 +13,11 @@ export class CSVReader {
     }
 
     try {
-      // Use Tauri's invoke to read the CSV file
-      const { invoke } = await import('@tauri-apps/api/core');
-      const csvContent = await invoke('read_breeding_csv') as string;
+      // Use global Tauri APIs to avoid module import issues
+      if (!window.__TAURI__) {
+        throw new Error('Tauri APIs not available');
+      }
+      const csvContent = await window.__TAURI__.invoke('read_breeding_csv') as string;
       
       // Parse CSV content
       const lines = csvContent.split('\n');

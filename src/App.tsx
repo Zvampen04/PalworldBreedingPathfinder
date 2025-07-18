@@ -2,11 +2,28 @@
 (window as any).appTsxLoaded = true;
 console.log('🚀 App.tsx module started loading...');
 
+// Declare global Tauri types
+declare global {
+  interface Window {
+    __TAURI__?: {
+      invoke: (command: string, args?: any) => Promise<any>;
+      event: {
+        listen: (event: string, callback: (event: any) => void) => Promise<() => void>;
+      };
+      shell?: {
+        sidecar: (name: string) => {
+          execute: () => Promise<{ code: number; stdout: string; stderr: string }>;
+        };
+      };
+    };
+  }
+}
+
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 
 console.log('✅ React hooks imported successfully');
 
-// We'll dynamically import Tauri APIs inside useEffect to avoid blocking module execution
+// We'll use global Tauri APIs to avoid module import issues
 let Command: any = null;
 let invoke: any = null; 
 let listen: any = null;
@@ -76,46 +93,48 @@ function AppContent() {
   const [pulseOngoingItemId, setPulseOngoingItemId] = useState<string | null>(null);
   const [tauriApiReady, setTauriApiReady] = useState(false);
 
-  // Load Tauri APIs dynamically
+  // Load Tauri APIs from global object
   useEffect(() => {
     const loadTauriAPIs = async () => {
       try {
-        console.log('🔄 Loading Tauri APIs dynamically...');
+        console.log('🔄 Loading Tauri APIs from global object...');
         
-        // Load shell plugin
-        try {
-          const shellModule = await import('@tauri-apps/plugin-shell');
-          Command = shellModule.Command;
-          console.log('✅ Tauri shell plugin loaded');
-        } catch (error) {
-          console.warn('⚠️ Tauri shell plugin not available:', error);
+        // Check if Tauri is available globally
+        const tauri = window.__TAURI__;
+        if (tauri) {
+          console.log('✅ Tauri global object available');
+          
+          // Use global Tauri APIs
+          invoke = tauri.invoke;
+          listen = tauri.event.listen;
+          
+          // For shell plugin, we'll use a fallback since it might not be available globally
+          Command = {
+            sidecar: (name: string) => ({
+              execute: async () => {
+                // Try to use the shell plugin if available
+                if (tauri.shell) {
+                  return tauri.shell.sidecar(name).execute();
+                } else {
+                  return { code: -1, stdout: '', stderr: 'Shell plugin not available' };
+                }
+              }
+            })
+          };
+          
+          console.log('✅ Tauri APIs loaded from global object');
+        } else {
+          console.warn('⚠️ Tauri global object not available');
+          // Fallback implementations
+          invoke = async () => {
+            throw new Error('Tauri invoke not available');
+          };
+          listen = async () => () => {};
           Command = {
             sidecar: () => ({
               execute: async () => ({ code: -1, stdout: '', stderr: 'Tauri not available' })
             })
           };
-        }
-
-        // Load core API
-        try {
-          const coreModule = await import('@tauri-apps/api/core');
-          invoke = coreModule.invoke;
-          console.log('✅ Tauri core API loaded');
-        } catch (error) {
-          console.warn('⚠️ Tauri core API not available:', error);
-          invoke = async () => {
-            throw new Error('Tauri invoke not available');
-          };
-        }
-
-        // Load event API
-        try {
-          const eventModule = await import('@tauri-apps/api/event');
-          listen = eventModule.listen;
-          console.log('✅ Tauri event API loaded');
-        } catch (error) {
-          console.warn('⚠️ Tauri event API not available:', error);
-          listen = async () => () => {};
         }
 
         setTauriApiReady(true);

@@ -5,11 +5,30 @@ import react from "@vitejs/plugin-react";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig({
   plugins: [react()],
 
   // Use relative base path for Tauri builds to ensure assets load correctly
-  base: './',
+  base: '',
+
+  // Ensure proper asset handling for Tauri
+  build: {
+    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
+    // @ts-expect-error process is a nodejs global
+    target: process.env.TAURI_ENV_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
+    // don't minify for debug builds
+    // @ts-expect-error process is a nodejs global
+    minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
+    // produce sourcemaps for debug builds
+    // @ts-expect-error process is a nodejs global
+    sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    // Ensure assets are properly handled
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -32,4 +51,4 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
-}));
+});
