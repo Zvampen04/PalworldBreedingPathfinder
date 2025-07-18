@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "shell-capability",
+  "description": "Capability for executing shell commands",
+  "windows": ["main"],
+  "permissions": [
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/breeding-path",
+          "sidecar": true,
+          "args": true
+        },
+        {
+          "name": "py",
+          "cmd": "py",
+          "args": [
+            {
+              "validator": ".*"
+            }
+          ]
+        },
+        {
+          "name": "python",
+          "cmd": "python", 
+          "args": [
+            {
+              "validator": ".*"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+} 

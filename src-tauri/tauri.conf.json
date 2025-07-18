@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "palworld-calculator",
+  "version": "0.1.0",
+  "identifier": "com.palworld-calculator",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Palworld Breeding Calculator",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "description": "Capability for the main window",
+          "windows": ["main"],
+          "permissions": [
+            "core:default",
+            "fs:allow-read-dir",
+            "fs:allow-read-file",
+            "fs:allow-read-text-file",
+            "fs:allow-exists",
+            "shell:allow-execute",
+            "shell:allow-open"
+          ]
+        },
+        "shell-capability",
+        "filesystem-capability"
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "../public/Assets/**/*"
+    ],
+    "externalBin": [
+      "binaries/breeding-path"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  // Context7 MCP: Updated for React/TS/JS monorepo best practices. See /microsoft/typescript and MCP docs for details.
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "node", // MCP: Use 'node' for React/JS/TS compatibility
+    "allowJs": true, // MCP: Allow JS files in project
+    "baseUrl": ".", // MCP: Enable flexible import paths
+    "paths": {
+      "*": ["src/*", "node_modules/*"]
+    },
+    "typeRoots": ["./node_modules/@types"], // MCP: Ensure all types are found
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "include": ["src", "public"], // MCP: Include all source and asset files
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

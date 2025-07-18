@@ -1,0 +1,238 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+@layer base {
+  body {
+    background: linear-gradient(135deg, #1e3a8a, #581c87, #312e81);
+    min-height: 100vh;
+    font-family: 'Orbitron', monospace;
+  }
+}
+
+@layer components {
+  .pal-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .pal-button {
+    background: linear-gradient(to right, #4A90E2, #9013FE);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+  }
+  
+  .pal-button:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+  }
+  
+  .pal-input {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: white;
+  }
+  
+  .pal-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .pal-input:focus {
+    outline: none;
+    ring: 2px solid #4A90E2;
+    border-color: transparent;
+  }
+  
+  .pal-select {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: white;
+    appearance: none;
+    cursor: pointer;
+  }
+  
+  .pal-select:focus {
+    outline: none;
+    ring: 2px solid #4A90E2;
+    border-color: transparent;
+  }
+  
+  .result-card {
+    background: linear-gradient(to right, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2));
+    backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+  }
+  
+  .error-card {
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.2), rgba(236, 72, 153, 0.2));
+    backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .loading-card {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+    backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+  }
+}
+
+.bg-gradient-repeat {
+  background-image: linear-gradient(135deg, #1e3a8a, #581c87 60%, #312e81 100%);
+  background-size: 100% 1200px;
+  background-repeat: repeat-y;
+  background-position: top;
+}
+
+.dark .bg-gradient-repeat {
+  background-image: linear-gradient(135deg, #1e3a8a, #581c87 60%, #312e81 100%);
+}
+
+.favorite-pulse-highlight {
+  animation: pulse-fade-highlight 1s linear forwards;
+  box-shadow: 0 0 0 0px #4A90E200, 0 0 0 0px #9013FE00;
+  border-radius: 8px;
+  z-index: 1;
+}
+@keyframes pulse-fade-highlight {
+  0% {
+    box-shadow: 0 0 0 0px #4A90E200, 0 0 0 0px #9013FE00;
+  }
+  33% {
+    box-shadow: 0 0 0 5px #4A90E2, 0 0 5px 4px #9013FE33;
+  }
+  100% {
+    box-shadow: 0 0 0 0px #4A90E200, 0 0 0 0px #9013FE00;
+  }
+}
+
+/* Utility classes for gradients, rounded corners, and shadows */
+
+.bg-gradient-blue-purple {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+}
+.bg-gradient-blue-purple-dark {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+}
+.bg-gradient-collection-modal {
+  background: linear-gradient(135deg, #f0f7ff 0%, #fff 50%, #e0e7ff 100%);
+}
+.bg-gradient-collection-modal-dark {
+  background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #312e81 100%);
+}
+
+.rounded-xl-std {
+  border-radius: 1rem;
+}
+.shadow-xl-std {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Example usage: className="bg-gradient-blue-purple rounded-xl-std shadow-xl-std" */
+
+/* Accessible color utility classes */
+.text-accessible-light {
+  color: #18181b !important; /* near-black for light backgrounds */
+}
+.text-accessible-dark {
+  color: #fafafa !important; /* near-white for dark backgrounds */
+}
+.bg-accessible-light {
+  background-color: #fff !important;
+}
+.bg-accessible-dark {
+  background-color: #18181b !important;
+}
+.text-accessible-secondary-light {
+  color: #334155 !important; /* slate-800 for secondary text on light */
+}
+.text-accessible-secondary-dark {
+  color: #e5e7eb !important; /* gray-200 for secondary text on dark */
+}
+
+/* Visually hidden but focusable skip link */
+.skip-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  z-index: 1000;
+  border-radius: 0 0 0.5rem 0.5rem;
+  transform: translateY(-100%);
+  transition: transform 0.2s;
+  outline: none;
+  font-weight: bold;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Strong focus indicator for all focusable elements */
+:focus-visible {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px #60a5fa55 !important;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 640px) {
+  .rounded-xl-std {
+    border-radius: 0.5rem;
+  }
+  .shadow-xl-std {
+    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
+  }
+  .pal-card, .result-card, .error-card, .loading-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  .pal-button {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+  }
+  .pal-input, .pal-select {
+    padding: 1rem 1rem;
+    font-size: 1.1rem;
+  }
+  .skip-link {
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+  }
+  .sidebar-mobile {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+  }
+}
+
+.gradient-header-text {
+  background: linear-gradient(to right, #4A90E2, #9013FE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}

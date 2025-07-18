@@ -1,0 +1,15 @@
+.spinner-blue-top {
+  border-top-color: #4A90E2;
+}
+.spinner-purple-bottom {
+  border-bottom-color: #9013FE;
+}
+.dot-blue {
+  background-color: #4A90E2;
+}
+.dot-purple {
+  background-color: #9013FE;
+}
+.dot-green {
+  background-color: #7ED321;
+} 

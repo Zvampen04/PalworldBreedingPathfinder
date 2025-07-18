@@ -1,0 +1,50 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-capability",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "fs:allow-exists",
+    "fs:allow-resource-read-recursive",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/breeding-path",
+          "sidecar": true,
+          "args": true
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        {
+          "path": "$RESOURCE/Assets"
+        },
+        {
+          "path": "public/Assets"
+        },
+        {
+          "path": "./public/Assets"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "$RESOURCE/Assets/**"
+        },
+        {
+          "path": "public/Assets/**"
+        },
+        {
+          "path": "./public/Assets/**"
+        }
+      ]
+    }
+  ]
+}

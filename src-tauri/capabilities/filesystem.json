@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "filesystem-capability",
+  "description": "Capability for reading filesystem including public assets",
+  "windows": ["main"],
+  "permissions": [
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        {
+          "path": "$APP/*"
+        },
+        {
+          "path": "$RESOURCE/*"
+        },
+        {
+          "path": "public/*"
+        },
+        {
+          "path": "public/Assets/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "$APP/*"
+        },
+        {
+          "path": "$RESOURCE/*"
+        },
+        {
+          "path": "public/*"
+        },
+        {
+          "path": "public/Assets/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "$APP/*"
+        },
+        {
+          "path": "$RESOURCE/*"
+        },
+        {
+          "path": "public/*"
+        },
+        {
+          "path": "public/Assets/*"
+        }
+      ]
+    }
+  ]
+} 
