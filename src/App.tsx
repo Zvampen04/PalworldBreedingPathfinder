@@ -1,11 +1,15 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Command } from '@tauri-apps/plugin-shell';
-import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
-
-// Mark that App.tsx has loaded
+// Mark that App.tsx has loaded FIRST
 (window as any).appTsxLoaded = true;
-console.log('🚀 App.tsx module imported successfully');
+console.log('🚀 App.tsx module started loading...');
+
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+
+console.log('✅ React hooks imported successfully');
+
+// We'll dynamically import Tauri APIs inside useEffect to avoid blocking module execution
+let Command: any = null;
+let invoke: any = null; 
+let listen: any = null;
 
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import Sidebar, { SidebarSection } from './components/layout/Sidebar';
@@ -70,6 +74,61 @@ function AppContent() {
   const [pendingCollectionId, setPendingCollectionId] = useState<string | null>(null);
   const [palList, setPalList] = useState<string[]>([]);
   const [pulseOngoingItemId, setPulseOngoingItemId] = useState<string | null>(null);
+  const [tauriApiReady, setTauriApiReady] = useState(false);
+
+  // Load Tauri APIs dynamically
+  useEffect(() => {
+    const loadTauriAPIs = async () => {
+      try {
+        console.log('🔄 Loading Tauri APIs dynamically...');
+        
+        // Load shell plugin
+        try {
+          const shellModule = await import('@tauri-apps/plugin-shell');
+          Command = shellModule.Command;
+          console.log('✅ Tauri shell plugin loaded');
+        } catch (error) {
+          console.warn('⚠️ Tauri shell plugin not available:', error);
+          Command = {
+            sidecar: () => ({
+              execute: async () => ({ code: -1, stdout: '', stderr: 'Tauri not available' })
+            })
+          };
+        }
+
+        // Load core API
+        try {
+          const coreModule = await import('@tauri-apps/api/core');
+          invoke = coreModule.invoke;
+          console.log('✅ Tauri core API loaded');
+        } catch (error) {
+          console.warn('⚠️ Tauri core API not available:', error);
+          invoke = async () => {
+            throw new Error('Tauri invoke not available');
+          };
+        }
+
+        // Load event API
+        try {
+          const eventModule = await import('@tauri-apps/api/event');
+          listen = eventModule.listen;
+          console.log('✅ Tauri event API loaded');
+        } catch (error) {
+          console.warn('⚠️ Tauri event API not available:', error);
+          listen = async () => () => {};
+        }
+
+        setTauriApiReady(true);
+        console.log('🎉 Tauri APIs ready');
+        
+      } catch (error) {
+        console.error('❌ Failed to load Tauri APIs:', error);
+        setTauriApiReady(true); // Still allow the app to work
+      }
+    };
+
+    loadTauriAPIs();
+  }, []);
 
   function showDialog(message: string, type: 'success' | 'error') {
     setDialog({ message, type });
@@ -83,12 +142,15 @@ function AppContent() {
 
   // Load Pal list from Tauri command
   useEffect(() => {
+    // Only try to load pal list if Tauri APIs are ready
+    if (!tauriApiReady) return;
+    
     const loadPalList = async () => {
       try {
         console.log('Loading Pal list from Tauri command...');
         
         // Call the Tauri command to get the Pal list
-        const palNames = await invoke<string[]>('get_pal_list');
+        const palNames = await invoke('get_pal_list') as string[];
         setPalList(palNames);
         console.log(`✓ Received ${palNames.length} Pal names from Tauri command`);
         
@@ -99,7 +161,7 @@ function AppContent() {
     };
 
     loadPalList();
-  }, []);
+  }, [tauriApiReady]);
 
   useEffect(() => {
     // Handler for running all three scripts
