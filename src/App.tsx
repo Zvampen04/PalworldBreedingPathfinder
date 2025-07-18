@@ -2,6 +2,11 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Command } from '@tauri-apps/plugin-shell';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+
+// Mark that App.tsx has loaded
+(window as any).appTsxLoaded = true;
+console.log('🚀 App.tsx module imported successfully');
+
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import Sidebar, { SidebarSection } from './components/layout/Sidebar';
 import { FavoritePath, PathProgress, isFavoritedBySteps } from './utils/storage';

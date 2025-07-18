@@ -46,21 +46,67 @@
       // Check for errors
       window.addEventListener('error', (event) => {
         updateDebug('❌ Error: ' + event.error?.message || 'Unknown error');
+        updateDebug('   File: ' + (event.filename || 'unknown'));
+        updateDebug('   Line: ' + (event.lineno || 'unknown'));
+        updateDebug('   Column: ' + (event.colno || 'unknown'));
+        if (event.error?.stack) {
+          updateDebug('   Stack: ' + event.error.stack.substring(0, 200) + '...');
+        }
       });
       
       window.addEventListener('unhandledrejection', (event) => {
         updateDebug('❌ Unhandled promise rejection: ' + event.reason);
+        if (typeof event.reason === 'object' && event.reason?.stack) {
+          updateDebug('   Stack: ' + event.reason.stack.substring(0, 200) + '...');
+        }
       });
+
+      // Track module loading errors specifically
+      window.moduleErrors = [];
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        window.moduleErrors.push(args.join(' '));
+        updateDebug('🚨 Console Error: ' + args.join(' '));
+        originalConsoleError.apply(console, args);
+      };
       
       // Check if React loads
       setTimeout(() => {
         updateDebug('⏰ 5 seconds passed - checking if React loaded...');
-        if (document.querySelector('#root').children.length === 1) {
+        const rootElement = document.querySelector('#root');
+        if (rootElement.children.length === 1) {
           updateDebug('⚠️ Still on loading screen - React may not have loaded');
+          updateDebug('🔍 Root element children count: ' + rootElement.children.length);
+          updateDebug('🔍 Root element HTML: ' + rootElement.innerHTML.substring(0, 200) + '...');
         } else {
           updateDebug('✅ React appears to have loaded');
+          updateDebug('🔍 Root element children count: ' + rootElement.children.length);
         }
       }, 5000);
+
+      // Add more detailed script loading monitoring
+      setTimeout(() => {
+        updateDebug('🔬 DETAILED SCRIPT ANALYSIS:');
+        const scripts = document.querySelectorAll('script[type="module"]');
+        scripts.forEach((script, index) => {
+          updateDebug(`   Module Script ${index}:`);
+          updateDebug(`     - src: ${script.src}`);
+          updateDebug(`     - loaded: ${script.readyState || 'unknown'}`);
+          updateDebug(`     - crossOrigin: ${script.crossOrigin}`);
+        });
+        
+        // Check if any modules are in the global scope
+        updateDebug('🌐 Global scope analysis:');
+        updateDebug('   - React in global: ' + (typeof window.React !== 'undefined'));
+        updateDebug('   - ReactDOM in global: ' + (typeof window.ReactDOM !== 'undefined'));
+        updateDebug('   - Module errors: ' + (window.moduleErrors || 'none'));
+        
+        // Check browser capabilities
+        updateDebug('🌐 Browser capabilities:');
+        updateDebug('   - ES6 modules supported: ' + ('noModule' in HTMLScriptElement.prototype));
+        updateDebug('   - Script type=module supported: ' + (HTMLScriptElement.prototype.hasOwnProperty('type')));
+        
+      }, 2000);
       
       // Check if the main JS file loaded
       const scriptElement = document.querySelector('script[src*="index-"]');
@@ -111,6 +157,26 @@
         updateDebug('   - location.protocol: ' + window.location.protocol);
         updateDebug('   - location.hostname: ' + window.location.hostname);
         updateDebug('   - location.pathname: ' + window.location.pathname);
+        
+        // Check if Tauri APIs are available
+        if (typeof window.__TAURI__ !== 'undefined') {
+          updateDebug('✅ Tauri APIs available');
+          try {
+            updateDebug('   - invoke: ' + (typeof window.__TAURI__.invoke !== 'undefined'));
+            updateDebug('   - event: ' + (typeof window.__TAURI__.event !== 'undefined'));
+          } catch (e) {
+            updateDebug('   - Error accessing Tauri APIs: ' + e.message);
+          }
+        } else {
+          updateDebug('❌ Tauri APIs not available - this might cause React to fail');
+          updateDebug('   This could be why the app works in dev but not in build');
+        }
+        
+        // Check if the script has actually executed
+        updateDebug('📊 Module execution check:');
+        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
+        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+        
       }, 1000);
     </script>
   </body>
