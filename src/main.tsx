@@ -9,10 +9,12 @@ declare global {
   }
 }
 
-import React from 'react';
+import * as React from 'react';
 import ReactDOM from "react-dom/client";
 import './App.css';
 import App from './App';
+
+const { StrictMode } = React;
 
 // Add immediate debug output
 function updatePageDebug(message: string, type: string = 'info') {
@@ -52,9 +54,9 @@ try {
       (window as any).appTsxLoaded = true;
       
       reactRoot.render(
-        <React.StrictMode>
+        <StrictMode>
           <App />
-        </React.StrictMode>
+        </StrictMode>
       );
       
       updatePageDebug('✅ React app rendered successfully');

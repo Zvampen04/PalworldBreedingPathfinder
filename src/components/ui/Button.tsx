@@ -1,4 +1,8 @@
-import React from 'react';
+import * as React from 'react';
+
+type ButtonHTMLAttributes<T> = React.ButtonHTMLAttributes<T>;
+type ReactNode = React.ReactNode;
+type FC<P = {}> = React.FunctionComponent<P>;
 
 /**
  * Reusable Button component for consistent styling, theming, and accessibility.
@@ -7,8 +11,8 @@ import React from 'react';
 export type ButtonVariant = 'primary' | 'secondary' | 'icon' | 'danger' | 'default';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   className?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -30,7 +34,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'text-base px-6 py-3',
 };
 
-const Button: React.FC<ButtonProps> = ({
+const Button: FC<ButtonProps> = ({
   children,
   className = '',
   variant = 'default',

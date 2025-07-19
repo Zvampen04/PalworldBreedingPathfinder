@@ -39,9 +39,11 @@ declare global {
 }
 
 updatePageDebug('📦 Importing React and hooks...');
-import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
+import * as React from 'react';
 updatePageDebug('✅ React hooks imported successfully');
 console.log('✅ React hooks imported successfully');
+
+const { useState, useEffect, Suspense, lazy, useRef } = React;
 
 // We'll use global Tauri APIs to avoid module import issues
 let Command: any = null;

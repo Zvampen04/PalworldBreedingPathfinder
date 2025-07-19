@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useContext } from 'react';
+import * as React from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+
+const { useEffect, useRef, useContext } = React;
 
 /**
  * Reusable Modal component for displaying dialogs and overlays.

@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import * as React from 'react';
 import { getFavorites, getCollections, getOngoingPaths, addFavorite, removeFavorite, addCollection, removeCollection, addPathToCollection, removePathFromCollection, removeFavoriteFromAllCollections, FavoritePath, PathProgress, Collection as StorageCollection } from '../../utils/storage';
+
+const { createContext, useContext, useState, useEffect, useCallback } = React;
+type ReactNode = React.ReactNode;
 
 /**
  * Context type for global favorites, collections, and ongoing state.

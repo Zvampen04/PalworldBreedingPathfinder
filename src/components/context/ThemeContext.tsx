@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import * as React from 'react';
+
+const { createContext, useContext, useEffect, useState } = React;
+type ReactNode = React.ReactNode;
 
 export type ThemeMode = 'light' | 'dark';
 

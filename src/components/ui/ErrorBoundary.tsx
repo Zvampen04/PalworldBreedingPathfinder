@@ -1,4 +1,8 @@
-import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import * as React from 'react';
+
+const { Component } = React;
+type ErrorInfo = React.ErrorInfo;
+type ReactNode = React.ReactNode;
 
 interface Props {
   children: ReactNode;

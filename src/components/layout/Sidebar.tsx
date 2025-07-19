@@ -1,6 +1,8 @@
-import React, { useState, useMemo, useCallback, useContext } from 'react';
+import * as React from 'react';
 import { FavoritePath, PathProgress } from '../../utils/storage';
 import { useFavorites } from '../context/FavoritesContext';
+
+const { useState, useMemo, useCallback, useContext } = React;
 import Button from '../ui/Button';
 import { ThemeContext } from '../context/ThemeContext';
 

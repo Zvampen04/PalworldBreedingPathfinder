@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext, FC } from 'react';
 import ExpandablePaths from '../ui/ExpandablePaths';
 import Input from '../ui/Input';
 import Radio from '../ui/Radio';
@@ -78,7 +78,7 @@ interface HomeProps {
   palList: string[];
 }
 
-const Home: React.FC<HomeProps> = ({
+const Home: FC<HomeProps> = ({
   mode, setMode,
   lookupParent1, setLookupParent1, lookupParent2, setLookupParent2,
   pathfindParent1, setPathfindParent1, pathfindTargetChild, setPathfindTargetChild,
