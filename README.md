@@ -55,17 +55,19 @@ npm install
 
 #### Development Mode
 ```bash
-# Start the development server
-npm run tauri dev
+# Start the development server using the run script
+bash run.sh
 ```
+
+**Note**: The Tauri build process is currently not working properly. For now, use the `run.sh` script to start the development server.
 
 #### Production Build
 ```bash
-# Build for production
+# Build for production (currently not working)
 npm run tauri build
 ```
 
-The built application will be available in `src-tauri/target/release/`.
+**⚠️ Important**: The production build is currently not functional. Use the development mode with `./run.sh` instead.
 
 ### Step 4: First Run Setup
 
@@ -105,11 +107,12 @@ palworld-calculator/
 
 ```bash
 # Development
-npm run tauri dev          # Start development server
+bash run.sh                # Start development server (recommended)
+npm run tauri dev          # Start development server (alternative)
 npm run dev                # Start Vite dev server only
 
 # Building
-npm run tauri build        # Build for production
+npm run tauri build        # Build for production (currently not working)
 npm run build              # Build frontend only
 
 # Utilities
@@ -178,6 +181,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🐛 Troubleshooting
 
 ### Common Issues
+
+**Tauri Build Not Working**
+- The production build is currently not functional
+- Use `bash run.sh` to start the development server instead
+- This is a known issue that's being worked on
 
 **"Failed to spawn sidecar" Error**
 - Ensure all Python dependencies are installed
