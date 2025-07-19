@@ -1,9 +1,9 @@
-import { FC } from 'react';
+import * as React from 'react';
 
 /**
  * Weaknesses page component for displaying elemental weaknesses.
  */
-const Weaknesses: FC = () => {
+const Weaknesses: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">

@@ -236,6 +236,14 @@ class PythonBinaryBuilder:
         except Exception as e:
             print(f"⚠️  Could not clean build directory: {e}")
         
+        # Clean up PyInstaller dist directory
+        try:
+            if self.dist_dir.exists():
+                shutil.rmtree(self.dist_dir)
+                print("✅ Cleaned PyInstaller dist directory")
+        except Exception as e:
+            print(f"⚠️  Could not clean PyInstaller dist directory: {e}")
+        
         # Remove .spec files
         for spec_file in self.script_dir.glob("*.spec"):
             try:

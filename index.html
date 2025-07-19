@@ -320,6 +320,56 @@
         }
       }, 3000);
       
+      // Auto-hide debug panel when React loads successfully
+      function checkReactLoaded() {
+        if (window.mainTsxLoaded && window.appTsxLoaded) {
+          updateDebug('🎉 React app loaded successfully! Hiding debug panel...', 'success');
+          
+          // Hide the debug panel and toggle button
+          const debugPanel = document.getElementById('debug-panel');
+          const debugToggle = document.getElementById('debug-toggle');
+          const debugInfo = document.getElementById('debug-info');
+          const todoList = document.getElementById('todo-list');
+          
+          if (debugPanel) debugPanel.classList.add('debug-hidden');
+          if (debugToggle) debugToggle.style.display = 'none';
+          if (debugInfo) debugInfo.style.display = 'none';
+          if (todoList) todoList.style.display = 'none';
+          
+          // Remove the loading message from the root
+          const root = document.getElementById('root');
+          if (root && root.children.length > 0) {
+            const loadingDiv = root.children[0];
+            if (loadingDiv.tagName === 'DIV' && loadingDiv.innerHTML.includes('Loading Palworld Breeding Calculator')) {
+              loadingDiv.remove();
+            }
+          }
+          
+          // Remove the main.tsx loaded indicator
+          const mainTsxIndicator = document.getElementById('main-tsx-loaded');
+          if (mainTsxIndicator) {
+            mainTsxIndicator.remove();
+          }
+          
+          // Remove the app.tsx loaded indicator
+          const appTsxIndicator = document.getElementById('app-tsx-loaded');
+          if (appTsxIndicator) {
+            appTsxIndicator.remove();
+          }
+          
+          // Stop checking
+          return true;
+        }
+        return false;
+      }
+      
+      // Check every 100ms for React loading
+      const reactCheckInterval = setInterval(() => {
+        if (checkReactLoaded()) {
+          clearInterval(reactCheckInterval);
+        }
+      }, 100);
+      
       // Global error handling with enhanced details
       window.addEventListener('error', (event) => {
         updateDebug('❌ Global Error: ' + event.message, 'error');

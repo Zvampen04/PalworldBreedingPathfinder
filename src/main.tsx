@@ -2,6 +2,15 @@
 (window as any).mainTsxLoaded = true;
 console.log('🚀 main.tsx module started loading...');
 
+// Add a visible indicator that the module loaded
+if (typeof document !== 'undefined') {
+  const indicator = document.createElement('div');
+  indicator.id = 'main-tsx-loaded';
+  indicator.style.cssText = 'position: fixed; top: 50px; left: 10px; background: green; color: white; padding: 5px; z-index: 10000; font-size: 12px;';
+  indicator.textContent = 'main.tsx LOADED';
+  document.body.appendChild(indicator);
+}
+
 // Declare global debug function
 declare global {
   interface Window {

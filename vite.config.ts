@@ -1,40 +1,51 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// @ts-expect-error process is a nodejs global
-const host = process.env.TAURI_DEV_HOST;
-
-// https://vitejs.dev/config/
+// Only expose variables with VITE_ or TAURI_ENV_ prefixes to the frontend
 export default defineConfig({
   plugins: [
     react({
-      // Use classic JSX transform for React 18+ with explicit React import
-      jsxRuntime: 'classic',
+      // modern JSX transform (no need for React import)
+      jsxRuntime: "automatic",
     }),
   ],
 
-  // Use relative base path for Tauri builds to ensure assets load correctly
-  base: './',
+  base: "./", // Use relative base path for Tauri builds
 
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  //
-  // 1. prevent vite from obscuring rust errors
-  clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
+  clearScreen: false, // So Tauri error output is visible
+
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
-      : undefined,
+    // Uncomment next line only if you're running Tauri dev server from a remote device:
+    // host: "0.0.0.0",
     watch: {
-      // 3. tell vite to ignore watching `src-tauri`
+      // Prevent Vite from watching changes in Tauri's Rust source folder
       ignored: ["**/src-tauri/**"],
     },
   },
-});
+
+  envPrefix: ["VITE_", "TAURI_ENV_"],
+
+  build: {
+    target: "es2020", // Ensure compatibility with Tauri's webview
+    outDir: "dist",
+    rollupOptions: {
+      output: {
+        assetFileNames: "assets/[name]-[hash].[ext]",
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+      },
+    },
+  },
+
+  // Define replacements for Tauri compatibility
+  define: {
+    // Replace import.meta.url with a compatible version for Tauri
+    "import.meta.url": "window.location.href",
+    // Ensure process.env is available but empty in browser context
+    "process.env": "{}",
+    // Remove global references that might cause issues
+    "global": "window",
+  },
+}); 

@@ -2,6 +2,15 @@
 (window as any).appTsxLoaded = true;
 console.log('🚀 App.tsx module started loading...');
 
+// Add a visible indicator that the module loaded
+if (typeof document !== 'undefined') {
+  const indicator = document.createElement('div');
+  indicator.id = 'app-tsx-loaded';
+  indicator.style.cssText = 'position: fixed; top: 80px; left: 10px; background: blue; color: white; padding: 5px; z-index: 10000; font-size: 12px;';
+  indicator.textContent = 'App.tsx LOADED';
+  document.body.appendChild(indicator);
+}
+
 // Add debug output to page
 function updatePageDebug(message: string, type: string = 'info') {
   console.log(message);
