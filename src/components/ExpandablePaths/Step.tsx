@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 interface StepProps {
@@ -12,7 +12,7 @@ interface StepProps {
 }
 
 const Step: React.FC<StepProps> = ({ step, isLast = false, showCheckbox = false, path, completedStepsMap, favoriteIds, handleStepToggle }) => {
-  const theme = React.useContext(ThemeContext);
+  const theme = useContext(ThemeContext);
   const isDarkMode = theme?.mode === 'dark';
   if (step.type === 'start') return null;
   const isCompleted = path && completedStepsMap[path.id]?.has(step.step_number);

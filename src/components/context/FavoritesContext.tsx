@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { getFavorites, getCollections, getOngoingPaths, addFavorite, removeFavorite, addCollection, removeCollection, addPathToCollection, removePathFromCollection, removeFavoriteFromAllCollections, FavoritePath, PathProgress, Collection as StorageCollection } from '../../utils/storage';
 
 /**
@@ -27,7 +27,7 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
  * React context for global favorites, collections, and ongoing state.
  * Use the FavoritesProvider to wrap your app.
  */
-export const FavoritesProvider = ({ children }: { children: React.ReactNode }) => {
+export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
   const [favorites, setFavorites] = useState<FavoritePath[]>([]);
   const [collections, setCollections] = useState<StorageCollection[]>([]);
   const [ongoing, setOngoing] = useState<Array<{ favorite: FavoritePath; progress: PathProgress }>>([]);

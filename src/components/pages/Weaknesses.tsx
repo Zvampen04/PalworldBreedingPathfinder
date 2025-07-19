@@ -1,9 +1,7 @@
 import React from 'react';
 
 /**
- * Weaknesses page component that displays the elemental weaknesses chart.
- * Shows the ElementalWeaknesses.webp image in a responsive container.
- * @component
+ * Weaknesses page component for displaying elemental weaknesses.
  */
 const Weaknesses: React.FC = () => {
   return (

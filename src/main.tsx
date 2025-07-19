@@ -1,103 +1,84 @@
-// Mark that main.tsx has loaded FIRST
+// Mark that main.tsx has loaded
 (window as any).mainTsxLoaded = true;
 console.log('🚀 main.tsx module started loading...');
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import './App.css';
-
-console.log('✅ Core imports successful');
-
-// Add error handling for React rendering
-console.log('🚀 main.tsx loaded - initializing React app...');
-
-// Update debug info on the page
-const debugStatus = document.getElementById('debug-status');
-function updatePageDebug(message: string) {
-  console.log(message);
-  if (debugStatus) {
-    debugStatus.innerHTML += '<br>' + message;
+// Declare global debug function
+declare global {
+  interface Window {
+    updateDebug?: (message: string, type?: string) => void;
   }
 }
 
-updatePageDebug('📦 main.tsx module loaded');
-updatePageDebug('🔍 Checking dependencies...');
-updatePageDebug('   - React: ' + (typeof React !== 'undefined' ? '✅' : '❌'));
-updatePageDebug('   - ReactDOM: ' + (typeof ReactDOM !== 'undefined' ? '✅' : '❌'));
+import React from 'react';
+import ReactDOM from "react-dom/client";
+import './App.css';
+import App from './App';
 
-const root = document.getElementById('root');
+// Add immediate debug output
+function updatePageDebug(message: string, type: string = 'info') {
+  console.log(message);
+  // Use the global debug function if available
+  if (typeof window.updateDebug === 'function') {
+    window.updateDebug(message, type);
+  } else {
+    // Fallback to direct DOM manipulation
+    const debugStatus = document.getElementById('debug-status');
+    if (debugStatus) {
+      const timestamp = new Date().toLocaleTimeString();
+      debugStatus.innerHTML += `<div class="debug-${type}">[${timestamp}] ${message}</div>`;
+      debugStatus.scrollTop = debugStatus.scrollHeight;
+    }
+  }
+}
 
-if (root) {
-  try {
-    updatePageDebug('✅ Found root element, creating React root...');
-    console.log('✅ Found root element, creating React root...');
-    const reactRoot = ReactDOM.createRoot(root);
-    
-    updatePageDebug('✅ React root created, loading App component...');
-    console.log('✅ React root created, loading App component...');
-    
-    // Dynamically import App to avoid blocking module execution
-    updatePageDebug('🔄 Dynamically importing App component...');
-    import('./App').then(({ default: App }) => {
-      updatePageDebug('✅ App component loaded, rendering...');
-      console.log('✅ App component loaded, rendering...');
+updatePageDebug('🎯 main.tsx module execution started');
+
+try {
+  updatePageDebug('📦 Core imports completed');
+  console.log('✅ Core imports successful');
+
+  updatePageDebug('📦 main.tsx module loaded - initializing React app...');
+
+  const root = document.getElementById('root');
+
+  if (root) {
+    try {
+      updatePageDebug('✅ Found root element, creating React root...');
+      const reactRoot = ReactDOM.createRoot(root);
+      
+      updatePageDebug('📦 Attempting to render App component...');
+      
+      // Mark that App.tsx is being executed
+      (window as any).appTsxLoaded = true;
       
       reactRoot.render(
         <React.StrictMode>
-          <a href="#main-content" className="skip-link">Skip to main content</a>
           <App />
         </React.StrictMode>
       );
+      
       updatePageDebug('✅ React app rendered successfully');
       console.log('✅ React app rendered successfully');
       
-      // Clear the loading screen after a short delay
-      setTimeout(() => {
-        updatePageDebug('🎉 React should be visible now');
-      }, 100);
-      
-    }).catch((error) => {
-      updatePageDebug('❌ Failed to load App component: ' + error.message);
-      console.error('❌ Failed to load App component:', error);
-      
-      // Show error in the root element
-      root.innerHTML = `
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
-          <div style="text-align: center; color: red;">
-            <h2>⚠️ Failed to Load App Component</h2>
-            <p>Error: ${error.message}</p>
-            <details style="margin-top: 20px; text-align: left;">
-              <summary>Error Details</summary>
-              <pre style="background: #f0f0f0; padding: 10px; border-radius: 5px; overflow: auto;">
-${error.stack || 'No stack trace available'}
-              </pre>
-            </details>
-          </div>
-        </div>
-      `;
-    });
-    
-  } catch (error) {
-    updatePageDebug('❌ Error creating React root: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    console.error('❌ Error creating React root:', error);
-    
-    // Fallback error display
-    root.innerHTML = `
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
-        <div style="text-align: center; color: red;">
-          <h2>⚠️ React Failed to Initialize</h2>
-          <p>Error: ${error instanceof Error ? error.message : 'Unknown error'}</p>
-          <details style="margin-top: 20px; text-align: left;">
-            <summary>Error Details</summary>
-            <pre style="background: #f0f0f0; padding: 10px; border-radius: 5px; overflow: auto;">
-${error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
-            </pre>
-          </details>
-        </div>
-      </div>
-    `;
+    } catch (error) {
+      updatePageDebug('❌ Error rendering React app: ' + error);
+      console.error('❌ Error rendering React app:', error);
+      if (error instanceof Error) {
+        updatePageDebug('   Error name: ' + error.name);
+        updatePageDebug('   Error message: ' + error.message);
+        updatePageDebug('   Error stack: ' + (error.stack || 'No stack').substring(0, 300));
+      }
+    }
+  } else {
+    updatePageDebug('❌ Root element not found');
+    console.error('❌ Root element not found');
   }
-} else {
-  updatePageDebug('❌ Root element not found');
-  console.error('❌ Root element not found');
+} catch (error) {
+  updatePageDebug('❌ Error in main.tsx: ' + error);
+  console.error('❌ Error in main.tsx:', error);
+  if (error instanceof Error) {
+    updatePageDebug('   Error name: ' + error.name);
+    updatePageDebug('   Error message: ' + error.message);
+    updatePageDebug('   Error stack: ' + (error.stack || 'No stack').substring(0, 300));
+  }
 }

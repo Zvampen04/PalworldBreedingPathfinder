@@ -5,6 +5,79 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Palworld Breeding Calculator</title>
+    <style>
+      .debug-panel {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 400px;
+        max-height: 80vh;
+        background: #1a1a1a;
+        color: #00ff00;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        padding: 10px;
+        border: 2px solid #00ff00;
+        border-radius: 5px;
+        overflow-y: auto;
+        z-index: 10000;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      }
+      .debug-panel h3 {
+        margin: 0 0 10px 0;
+        color: #ffff00;
+        text-align: center;
+      }
+      .debug-entry {
+        margin: 2px 0;
+        padding: 2px 0;
+        border-bottom: 1px solid #333;
+      }
+      .debug-error { color: #ff4444; }
+      .debug-success { color: #44ff44; }
+      .debug-warning { color: #ffaa00; }
+      .debug-info { color: #00aaff; }
+      .debug-clear-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 2px 6px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 10px;
+      }
+      .debug-copy-btn {
+        position: absolute;
+        top: 5px;
+        right: 50px;
+        background: #00aaff;
+        color: white;
+        border: none;
+        padding: 2px 6px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 10px;
+      }
+      .debug-toggle-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #00ff00;
+        color: black;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        z-index: 10001;
+      }
+      .debug-hidden {
+        display: none;
+      }
+    </style>
   </head>
 
   <body>
@@ -13,109 +86,313 @@
       <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
         <div style="text-align: center;">
           <h2>Loading Palworld Breeding Calculator...</h2>
-          <p>If this message persists, please check the console for errors.</p>
-          <div id="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; text-align: left; max-width: 400px;">
+          <p>If this message persists, please check the debug panel (top-right corner).</p>
+          <div id="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; text-align: left; max-width: 800px; max-height: 500px; overflow-y: auto;">
             <strong>Debug Info:</strong><br>
             <span id="debug-status">Initializing...</span>
+          </div>
+          <div id="todo-list" style="margin-top: 20px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; text-align: left; max-width: 800px;">
+            <strong>🔧 TODO - Debugging Steps:</strong><br>
+            <ol>
+              <li>Check debug panel (top-right corner) for detailed errors</li>
+              <li>Press F12 or right-click → Inspect to open DevTools</li>
+              <li>Check Console tab for JavaScript errors</li>
+              <li>Verify Vite build configuration</li>
+              <li>Check Tauri asset serving configuration</li>
+              <li>Test with different browsers</li>
+              <li>Compare dev vs production bundle differences</li>
+              <li>Check for missing dependencies in production</li>
+            </ol>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Floating Debug Panel -->
+    <button id="debug-toggle" class="debug-toggle-btn">🐛 Debug</button>
+    <div id="debug-panel" class="debug-panel debug-hidden">
+      <h3>🐛 Debug Panel</h3>
+      <button class="debug-clear-btn" onclick="clearDebug()">Clear</button>
+      <button class="debug-copy-btn" onclick="copyDebug()">Copy</button>
+      <div id="debug-content"></div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
+
     <script>
-      // Enhanced debugging for module loading
-      const debugStatus = document.getElementById('debug-status');
+      // Enhanced debugging for Tauri built mode
+      let debugEntries = [];
+      let debugPanelVisible = false;
       
-      function updateDebug(message) {
-        console.log(message);
+             function updateDebug(message, type = 'info') {
+         const timestamp = new Date().toLocaleTimeString();
+         const entry = `[${timestamp}] ${message}`;
+         
+         // Add to array
+         debugEntries.push({ message: entry, type });
+         
+         // Update both debug displays
+         updateDebugDisplay();
+         
+         // Also log to console if available
+         try {
+           console.log(message);
+         } catch (e) {
+           // Console not available in some Tauri builds
+         }
+       }
+       
+       // Make debug function globally available for React components
+       window.updateDebug = updateDebug;
+      
+      function updateDebugDisplay() {
+        // Update the main debug status
+        const debugStatus = document.getElementById('debug-status');
         if (debugStatus) {
-          debugStatus.innerHTML += '<br>' + message;
+          debugStatus.innerHTML = debugEntries.slice(-10).map(entry => 
+            `<div class="debug-${entry.type}">${entry.message}</div>`
+          ).join('');
+          debugStatus.scrollTop = debugStatus.scrollHeight;
+        }
+        
+        // Update the floating debug panel
+        const debugContent = document.getElementById('debug-content');
+        if (debugContent) {
+          debugContent.innerHTML = debugEntries.map(entry => 
+            `<div class="debug-entry debug-${entry.type}">${entry.message}</div>`
+          ).join('');
+          debugContent.scrollTop = debugContent.scrollHeight;
         }
       }
       
-      updateDebug('🚀 HTML loaded, waiting for React...');
+      function clearDebug() {
+        debugEntries = [];
+        updateDebugDisplay();
+      }
       
-      // Track module script loading
-      const moduleScript = document.querySelector('script[src="/src/main.tsx"]');
+      function copyDebug() {
+        const debugText = debugEntries.map(entry => entry.message).join('\n');
+        navigator.clipboard.writeText(debugText).then(() => {
+          updateDebug('Debug info copied to clipboard!', 'success');
+        }).catch(() => {
+          updateDebug('Failed to copy debug info', 'error');
+        });
+      }
+      
+      // Toggle debug panel visibility
+      document.getElementById('debug-toggle').addEventListener('click', () => {
+        const panel = document.getElementById('debug-panel');
+        debugPanelVisible = !debugPanelVisible;
+        panel.classList.toggle('debug-hidden', !debugPanelVisible);
+        document.getElementById('debug-toggle').textContent = debugPanelVisible ? '🐛 Hide' : '🐛 Debug';
+      });
+      
+      updateDebug('🚀 HTML loaded, waiting for React...', 'info');
+      
+      // Check for module script element immediately
+      updateDebug('🔍 Checking for module script element...', 'info');
+      
+      // Look for the built module script in the head
+      const moduleScript = document.querySelector('head script[type="module"]');
       if (moduleScript) {
-        updateDebug('📜 Found module script element');
+        updateDebug('✅ Found module script element', 'success');
+        updateDebug('   - src: ' + moduleScript.src, 'info');
+        updateDebug('   - type: ' + moduleScript.type, 'info');
         
+        // Add event listeners to track loading
         moduleScript.addEventListener('load', () => {
-          updateDebug('✅ Module script loaded successfully');
+          updateDebug('✅ Module script loaded successfully', 'success');
         });
         
         moduleScript.addEventListener('error', (event) => {
-          updateDebug('❌ Module script failed to load');
-          updateDebug('   Error: ' + JSON.stringify({
+          updateDebug('❌ Module script failed to load', 'error');
+          updateDebug('   Error details: ' + JSON.stringify({
             type: event.type,
-            target: event.target?.src || 'unknown'
-          }));
+            target: event.target?.src || 'unknown',
+            error: event.error?.message || 'No error message'
+          }), 'error');
+          
+          // Enhanced error details
+          if (event.error) {
+            updateDebug('   Error name: ' + event.error.name, 'error');
+            updateDebug('   Error message: ' + event.error.message, 'error');
+            updateDebug('   Error stack: ' + (event.error.stack || 'No stack').substring(0, 300), 'error');
+          }
         });
       } else {
-        updateDebug('❌ Module script element not found');
+        updateDebug('❌ No module script element found in head', 'error');
+        updateDebug('   - All scripts: ' + document.querySelectorAll('script').length, 'info');
+        document.querySelectorAll('script').forEach((script, index) => {
+          updateDebug(`   - Script ${index}: type="${script.type}", src="${script.src}"`, 'info');
+        });
       }
       
-      // Enhanced error tracking
+      // Check if we're in a Tauri environment
+      setTimeout(() => {
+        updateDebug('🔍 Environment check:', 'info');
+        updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'), 'info');
+        updateDebug('   - location.href: ' + window.location.href, 'info');
+        updateDebug('   - location.protocol: ' + window.location.protocol, 'info');
+        updateDebug('   - document.readyState: ' + document.readyState, 'info');
+        
+        if (typeof window.__TAURI__ !== 'undefined') {
+          updateDebug('✅ Tauri APIs available', 'success');
+        } else {
+          updateDebug('❌ Tauri APIs not available', 'error');
+        }
+        
+        // Check if React has loaded
+        updateDebug('📊 React loading check:', 'info');
+        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false), 'info');
+        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false), 'info');
+        
+        // Test module accessibility
+        updateDebug('🔍 Testing module accessibility...', 'info');
+        const scriptSrc = moduleScript ? moduleScript.src : 'No module script found';
+        updateDebug('   - Testing: ' + scriptSrc, 'info');
+        
+        if (scriptSrc !== 'No module script found') {
+          fetch(scriptSrc)
+            .then(response => {
+              updateDebug('📥 Module fetch: ' + response.status + ' ' + response.statusText, 'info');
+              if (!response.ok) {
+                updateDebug('❌ Module not accessible via fetch', 'error');
+              } else {
+                updateDebug('✅ Module is accessible via fetch', 'success');
+                // Try to get the content to check for syntax errors
+                return response.text();
+              }
+            })
+            .then(content => {
+              if (content) {
+                updateDebug('📄 Module content length: ' + content.length + ' characters', 'info');
+                updateDebug('📄 Module content preview: ' + content.substring(0, 200) + '...', 'info');
+                
+                // Check for common issues in the bundle
+                if (content.includes('import.meta')) {
+                  updateDebug('⚠️ Bundle contains import.meta - may cause issues in Tauri', 'warning');
+                }
+                if (content.includes('process.env')) {
+                  updateDebug('⚠️ Bundle contains process.env - may cause issues in Tauri', 'warning');
+                }
+                if (content.includes('__dirname') || content.includes('__filename')) {
+                  updateDebug('⚠️ Bundle contains Node.js globals - may cause issues in Tauri', 'warning');
+                }
+              }
+            })
+            .catch(error => {
+              updateDebug('❌ Module fetch failed: ' + error.message, 'error');
+            });
+        } else {
+          updateDebug('❌ No module script to test', 'error');
+        }
+      }, 1000);
+      
+      // Check again after more time
+      setTimeout(() => {
+        updateDebug('🔄 Final check after 3 seconds:', 'info');
+        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false), 'info');
+        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false), 'info');
+        
+        if (!window.mainTsxLoaded) {
+          updateDebug('⚠️ main.tsx still not executed after 3 seconds', 'warning');
+          updateDebug('💡 This suggests the module script is not loading at all', 'info');
+          
+          // Try to manually trigger module loading with the correct path
+          if (moduleScript) {
+            updateDebug('🔄 Attempting manual module load...', 'info');
+            const newScript = document.createElement('script');
+            newScript.type = 'module';
+            newScript.src = moduleScript.src;
+            newScript.onload = () => updateDebug('✅ Manual module load successful', 'success');
+            newScript.onerror = (e) => {
+              updateDebug('❌ Manual module load failed: ' + e, 'error');
+              updateDebug('   Error type: ' + e.type, 'error');
+              if (e.error) {
+                updateDebug('   Error details: ' + e.error.message, 'error');
+                updateDebug('   Error stack: ' + (e.error.stack || 'No stack').substring(0, 300), 'error');
+              }
+            };
+            document.head.appendChild(newScript);
+          } else {
+            updateDebug('❌ No module script available for manual loading', 'error');
+          }
+        }
+      }, 3000);
+      
+      // Global error handling with enhanced details
       window.addEventListener('error', (event) => {
-        updateDebug('❌ Global Error: ' + event.message);
-        updateDebug('   File: ' + event.filename);
-        updateDebug('   Line: ' + event.lineno);
+        updateDebug('❌ Global Error: ' + event.message, 'error');
+        updateDebug('   File: ' + event.filename, 'error');
+        updateDebug('   Line: ' + event.lineno, 'error');
+        updateDebug('   Column: ' + event.colno, 'error');
         if (event.error) {
-          updateDebug('   Stack: ' + (event.error.stack || 'No stack').substring(0, 200));
+          updateDebug('   Error name: ' + event.error.name, 'error');
+          updateDebug('   Error message: ' + event.error.message, 'error');
+          updateDebug('   Error stack: ' + (event.error.stack || 'No stack').substring(0, 400), 'error');
         }
       });
       
       window.addEventListener('unhandledrejection', (event) => {
-        updateDebug('❌ Unhandled Promise Rejection: ' + event.reason);
+        updateDebug('❌ Unhandled Promise Rejection: ' + event.reason, 'error');
+        if (event.reason && event.reason.stack) {
+          updateDebug('   Stack: ' + event.reason.stack.substring(0, 300), 'error');
+        }
       });
       
-      // Check if we're in a Tauri environment
-      setTimeout(() => {
-        updateDebug('🔍 Environment check:');
-        updateDebug('   - window.__TAURI__: ' + (typeof window.__TAURI__ !== 'undefined'));
-        updateDebug('   - window.TAURI: ' + (typeof window.TAURI !== 'undefined'));
-        updateDebug('   - location.href: ' + window.location.href);
-        updateDebug('   - location.protocol: ' + window.location.protocol);
-        
-        // Check if Tauri APIs are available
-        if (typeof window.__TAURI__ !== 'undefined') {
-          updateDebug('✅ Tauri APIs available');
-        } else {
-          updateDebug('❌ Tauri APIs not available - this might cause React to fail');
-        }
-        
-        // Check if the script has actually executed
-        updateDebug('📊 Module execution check:');
-        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
-        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
-        
-        // Try to manually fetch the module to see if it's accessible
-        updateDebug('🔍 Testing module accessibility...');
-        fetch('/src/main.tsx')
-          .then(response => {
-            updateDebug('📥 Module fetch: ' + response.status + ' ' + response.statusText);
-            if (!response.ok) {
-              updateDebug('❌ Module not accessible via fetch');
-            } else {
-              updateDebug('✅ Module is accessible via fetch');
-            }
-          })
-          .catch(error => {
-            updateDebug('❌ Module fetch failed: ' + error.message);
-          });
-      }, 1000);
+      // Monitor DOM changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') {
+                updateDebug('📜 New script added: ' + node.src + ' (type: ' + node.type + ')', 'info');
+              }
+            });
+          }
+        });
+      });
       
-      // Recheck execution after more time
+      observer.observe(document.head, { childList: true });
+      
+      // Additional debugging: Check for common Tauri issues
       setTimeout(() => {
-        updateDebug('🔄 Final check after 3 seconds:');
-        updateDebug('   - main.tsx executed: ' + (window.mainTsxLoaded || false));
-        updateDebug('   - App.tsx executed: ' + (window.appTsxLoaded || false));
+        updateDebug('🔍 Tauri-specific checks:', 'info');
         
-        if (!window.mainTsxLoaded) {
-          updateDebug('⚠️ main.tsx still not executed after 3 seconds');
-          updateDebug('💡 This suggests the module script is not loading at all');
+        // Check if we're in a secure context
+        updateDebug('   - Secure context: ' + window.isSecureContext, 'info');
+        
+        // Check for CSP issues
+        const metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (metaCSP) {
+          updateDebug('   - CSP found: ' + metaCSP.content.substring(0, 100) + '...', 'info');
+        } else {
+          updateDebug('   - No CSP meta tag found', 'info');
         }
-      }, 3000);
+        
+        // Check for other script loading issues
+        const allScripts = document.querySelectorAll('script');
+        updateDebug('   - Total scripts loaded: ' + allScripts.length, 'info');
+        allScripts.forEach((script, index) => {
+          if (script.src) {
+            updateDebug(`   - Script ${index}: ${script.src} (${script.type || 'no type'})`, 'info');
+          }
+        });
+      }, 2000);
+      
+      // Add keyboard shortcuts for debugging
+      document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+          // Ctrl+Shift+D to toggle debug panel
+          event.preventDefault();
+          document.getElementById('debug-toggle').click();
+        }
+        if (event.ctrlKey && event.shiftKey && event.key === 'C') {
+          // Ctrl+Shift+C to copy debug info
+          event.preventDefault();
+          copyDebug();
+        }
+      });
     </script>
   </body>
 </html>

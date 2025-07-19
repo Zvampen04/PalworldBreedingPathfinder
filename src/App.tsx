@@ -2,6 +2,25 @@
 (window as any).appTsxLoaded = true;
 console.log('🚀 App.tsx module started loading...');
 
+// Add debug output to page
+function updatePageDebug(message: string, type: string = 'info') {
+  console.log(message);
+  // Use the global debug function if available
+  if (typeof window.updateDebug === 'function') {
+    window.updateDebug(message, type);
+  } else {
+    // Fallback to direct DOM manipulation
+    const debugStatus = document.getElementById('debug-status');
+    if (debugStatus) {
+      const timestamp = new Date().toLocaleTimeString();
+      debugStatus.innerHTML += `<div class="debug-${type}">[${timestamp}] ${message}</div>`;
+      debugStatus.scrollTop = debugStatus.scrollHeight;
+    }
+  }
+}
+
+updatePageDebug('🎯 App.tsx module execution started');
+
 // Declare global Tauri types
 declare global {
   interface Window {
@@ -19,8 +38,9 @@ declare global {
   }
 }
 
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-
+updatePageDebug('📦 Importing React and hooks...');
+import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
+updatePageDebug('✅ React hooks imported successfully');
 console.log('✅ React hooks imported successfully');
 
 // We'll use global Tauri APIs to avoid module import issues
@@ -709,7 +729,7 @@ function AppContent() {
   };
 
   // Fix favoriteRefs type
-  const favoriteRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
+  const favoriteRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (selectedFavoriteId && favoriteRefs.current[selectedFavoriteId]) {
@@ -1049,16 +1069,12 @@ export default function App() {
   // Add debugging for production builds
   useEffect(() => {
     console.log('🚀 App starting...');
-    console.log('Environment:', import.meta.env.MODE);
-    console.log('Base URL:', import.meta.env.BASE_URL);
     console.log('User Agent:', navigator.userAgent);
     
     // Update debug info on the page
     const debugStatus = document.getElementById('debug-status');
     if (debugStatus) {
       debugStatus.innerHTML += '<br>🚀 React App starting...';
-      debugStatus.innerHTML += '<br>Environment: ' + import.meta.env.MODE;
-      debugStatus.innerHTML += '<br>Base URL: ' + import.meta.env.BASE_URL;
     }
     
     // Check if we're in a Tauri environment
