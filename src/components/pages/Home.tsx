@@ -69,10 +69,14 @@ interface HomeProps {
   result: any;
   maxPaths: number;
   setMaxPaths: (n: number) => void;
+  customMaxPaths: string;
+  setCustomMaxPaths: (s: string) => void;
   maxPathsEnabled: boolean;
   setMaxPathsEnabled: (b: boolean) => void;
   maxDepth: number;
   setMaxDepth: (n: number) => void;
+  customMaxDepth: string;
+  setCustomMaxDepth: (s: string) => void;
   maxDepthEnabled: boolean;
   setMaxDepthEnabled: (b: boolean) => void;
   onRun: () => void;
@@ -91,8 +95,8 @@ const Home: React.FC<HomeProps> = ({
   childLookupTarget, setChildLookupTarget,
   computationTime, setComputationTime, customTime, setCustomTime,
   computationTimeEnabled, setComputationTimeEnabled,
-  isLoading, result, maxPaths, setMaxPaths, maxPathsEnabled, setMaxPathsEnabled,
-  maxDepth, setMaxDepth, maxDepthEnabled, setMaxDepthEnabled,
+  isLoading, result, maxPaths, setMaxPaths, customMaxPaths, setCustomMaxPaths, maxPathsEnabled, setMaxPathsEnabled,
+  maxDepth, setMaxDepth, customMaxDepth, setCustomMaxDepth, maxDepthEnabled, setMaxDepthEnabled,
   onRun, onClear, onLoadMore, onAddToCollection, progress, progressError,
   palList
 }) => {
@@ -259,8 +263,8 @@ const Home: React.FC<HomeProps> = ({
             {[1, 3, 5, 10].map((sec) => (
               <Button
                 key={sec}
-                onClick={() => { setComputationTime(sec); setCustomTime(''); }}
-                variant={computationTime === sec && !customTime ? 'primary' : 'secondary'}
+                onClick={() => { setComputationTime(sec); setCustomTime(String(sec)); }}
+                variant={computationTime === sec && customTime === String(sec) ? 'primary' : 'secondary'}
                 size="sm"
                 dark={isDark}
                 disabled={!computationTimeEnabled}
@@ -298,8 +302,8 @@ const Home: React.FC<HomeProps> = ({
             {[20, 50, 100, 200].map((paths) => (
               <Button
                 key={paths}
-                onClick={() => setMaxPaths(paths)}
-                variant={maxPaths === paths ? 'primary' : 'secondary'}
+                onClick={() => { setMaxPaths(paths); setCustomMaxPaths(String(paths)); }}
+                variant={maxPaths === paths && customMaxPaths === String(paths) ? 'primary' : 'secondary'}
                 size="sm"
                 dark={isDark}
                 disabled={!maxPathsEnabled}
@@ -311,8 +315,8 @@ const Home: React.FC<HomeProps> = ({
               type="number"
               min={1}
               max={1000}
-              value={maxPaths}
-              onChange={e => setMaxPaths(Number(e.target.value) || 100)}
+              value={customMaxPaths}
+              onChange={e => { setCustomMaxPaths(e.target.value); setMaxPaths(Number(e.target.value) || 100); }}
               className="w-20 ml-2"
               theme={isDark ? 'dark' : 'light'}
               disabled={!maxPathsEnabled}
@@ -333,8 +337,8 @@ const Home: React.FC<HomeProps> = ({
             {[3, 4, 5, 6, 7].map((depth) => (
               <Button
                 key={depth}
-                onClick={() => setMaxDepth(depth)}
-                variant={maxDepth === depth ? 'primary' : 'secondary'}
+                onClick={() => { setMaxDepth(depth); setCustomMaxDepth(String(depth)); }}
+                variant={maxDepth === depth && customMaxDepth === String(depth) ? 'primary' : 'secondary'}
                 size="sm"
                 dark={isDark}
                 disabled={!maxDepthEnabled}
@@ -346,8 +350,8 @@ const Home: React.FC<HomeProps> = ({
               type="number"
               min={1}
               max={10}
-              value={maxDepth}
-              onChange={e => setMaxDepth(Number(e.target.value) || 5)}
+              value={customMaxDepth}
+              onChange={e => { setCustomMaxDepth(e.target.value); setMaxDepth(Number(e.target.value) || 5); }}
               className="w-16 ml-2"
               theme={isDark ? 'dark' : 'light'}
               disabled={!maxDepthEnabled}
