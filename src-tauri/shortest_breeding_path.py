@@ -176,6 +176,71 @@ class BreedingPathFinder:
         # Always return up to max_paths, even if time was the limiting factor
         return paths[:max_paths] if max_paths else paths
     
+    def find_all_paths(self, start_parent: str, target_child: str, max_paths: int = 20, max_seconds: Optional[float] = None, max_depth: int = 5) -> List[List[str]]:
+        """Find all possible breeding paths from a parent to target child using BFS, not just shortest ones"""
+        start_parent = self.normalize_pal_name(start_parent)
+        target_child = self.normalize_pal_name(target_child)
+        
+        if start_parent not in self.all_pals:
+            if not self.json_mode:
+                print(f"❌ Unknown parent Pal: {start_parent}")
+            return []
+        
+        if target_child not in self.all_pals:
+            if not self.json_mode:
+                print(f"❌ Unknown target Pal: {target_child}")
+            return []
+        
+        if start_parent == target_child:
+            return [[start_parent]]
+        
+        # BFS to find all paths up to max_depth
+        queue = deque([(start_parent, [start_parent])])  # (current_pal, path)
+        paths = []
+        start_time = time.time()
+        
+        while queue:
+            if max_seconds is not None and (time.time() - start_time) > max_seconds:
+                break
+            if max_paths and len(paths) >= max_paths:
+                break
+            current_pal, path = queue.popleft()
+
+            # Stop if we've reached max depth
+            if len(path) > max_depth:
+                continue
+
+            # Prevent cycles: do not allow the start parent or target child as an intermediate step
+            # (except as the first or last node)
+            if len(path) > 1:
+                intermediates = set(path[1:])
+                if start_parent in intermediates or target_child in intermediates:
+                    continue
+
+            # Try all possible breeding combinations where current_pal is one parent
+            for other_parent in self.all_pals:
+                if other_parent == current_pal:
+                    continue
+
+                child = self.breeding_data.get((current_pal, other_parent))
+                if child:
+                    new_path = path + [f"{current_pal} + {other_parent} = {child}"]
+
+                    if child == target_child:
+                        # Found a path to target
+                        # Check for cycles in the full path (including the result)
+                        intermediates = set(new_path[1:-1])
+                        if start_parent in intermediates or target_child in intermediates:
+                            continue
+                        paths.append(new_path)
+                    else:
+                        # Continue searching from this child
+                        queue.append((child, new_path))
+
+        # Sort paths by length (shortest first) and return up to max_paths
+        paths.sort(key=len)
+        return paths[:max_paths] if max_paths else paths
+    
     def group_paths_by_common_prefix(self, paths: List[List[str]]) -> dict:
         """Group paths by common prefixes to create an expandable tree structure"""
         if not paths:
@@ -216,9 +281,12 @@ class BreedingPathFinder:
         
         return build_tree(paths)
     
-    def format_expandable_paths(self, start_parent: str, target_child: str, max_paths: int = 20, max_seconds: Optional[float] = None) -> dict:
+    def format_expandable_paths(self, start_parent: str, target_child: str, max_paths: int = 20, max_seconds: Optional[float] = None, find_all: bool = False, max_depth: int = 5) -> dict:
         """Return breeding paths in an expandable format suitable for UI"""
-        paths = self.find_shortest_paths(start_parent, target_child, max_paths, max_seconds)
+        if find_all:
+            paths = self.find_all_paths(start_parent, target_child, max_paths, max_seconds, max_depth)
+        else:
+            paths = self.find_shortest_paths(start_parent, target_child, max_paths, max_seconds)
         
         if not paths:
             return {
@@ -523,10 +591,14 @@ Examples:
                        help='Path to breeding combinations CSV file')
     parser.add_argument('--json', action='store_true', 
                        help='Output results in JSON format (for UI integration)')
-    parser.add_argument('--max-paths', type=int, default=20,
-                       help='Maximum number of paths to find (default: 20)')
+    parser.add_argument('--max-paths', type=int, default=100,
+                       help='Maximum number of paths to find (default: 100)')
     parser.add_argument('--max-seconds', type=float, default=None,
                        help='Maximum time (in seconds) to search for paths (overrides max-paths if set)')
+    parser.add_argument('--find-all', action='store_true',
+                       help='Find all possible paths, not just shortest ones')
+    parser.add_argument('--max-depth', type=int, default=5,
+                       help='Maximum depth to search when using --find-all (default: 5)')
     
     args = parser.parse_args()
     
@@ -568,7 +640,7 @@ Examples:
         # Mode 2: Find paths from parent1 to child
         if args.json:
             import json
-            result = finder.format_expandable_paths(args.parent1, args.child, args.max_paths, args.max_seconds)
+            result = finder.format_expandable_paths(args.parent1, args.child, args.max_paths, args.max_seconds, args.find_all, args.max_depth)
             print(json.dumps(result, indent=2))
         else:
             finder.print_shortest_paths(args.parent1, args.child)
@@ -577,7 +649,7 @@ Examples:
         # Mode 3: Find paths from parent2 to child  
         if args.json:
             import json
-            result = finder.format_expandable_paths(args.parent2, args.child, args.max_paths, args.max_seconds)
+            result = finder.format_expandable_paths(args.parent2, args.child, args.max_paths, args.max_seconds, args.find_all, args.max_depth)
             print(json.dumps(result, indent=2))
         else:
             finder.print_shortest_paths(args.parent2, args.child)

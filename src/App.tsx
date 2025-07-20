@@ -45,10 +45,13 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BreedingResult | null>(null);
   const [currentSection, setCurrentSection] = useState<SidebarSection>('home');
-  const [computationTime, setComputationTime] = useState<number>(3); // Default 3 seconds
+  const [computationTime, setComputationTime] = useState<number>(10); // Default 10 seconds
   const [customTime, setCustomTime] = useState<string>('');
-  const [maxPaths, setMaxPaths] = useState<number>(20);
+  const [maxPaths, setMaxPaths] = useState<number>(100);
   const [maxPathsEnabled, setMaxPathsEnabled] = useState(true);
+  const [maxDepth, setMaxDepth] = useState<number>(5);
+  const [maxDepthEnabled, setMaxDepthEnabled] = useState(true);
+  const [findAllPaths, setFindAllPaths] = useState<boolean>(false);
   const [progress, setProgress] = useState<{ current: number; max: number; label: string } | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
@@ -380,15 +383,26 @@ function AppContent() {
           } else if (typeof maxPaths === 'number') {
             effectiveMaxPaths = maxPaths;
           } else {
-            effectiveMaxPaths = 20; // fallback default
+            effectiveMaxPaths = 100; // fallback default
           }
         } else {
           effectiveMaxPaths = 1000000; // Effectively unlimited
         }
-        if (isNaN(effectiveMaxPaths)) effectiveMaxPaths = 20;
+        if (isNaN(effectiveMaxPaths)) effectiveMaxPaths = 100;
         if (parent1 && targetChild) {
           let args: string[] = [];
           args = ['-p1', parent1, '-c', targetChild, '--json', '--max-paths', String(effectiveMaxPaths)];
+          
+          // Add find-all flag if enabled
+          if (findAllPaths) {
+            args.push('--find-all');
+          }
+          
+          // Add max-depth if enabled
+          if (maxDepthEnabled) {
+            args.push('--max-depth', String(maxDepth));
+          }
+          
           if (maxSeconds > 0) {
             args.push('--max-seconds', String(maxSeconds));
           }
@@ -829,6 +843,12 @@ function AppContent() {
                   setMaxPaths={setMaxPaths}
                   maxPathsEnabled={maxPathsEnabled}
                   setMaxPathsEnabled={setMaxPathsEnabled}
+                  maxDepth={maxDepth}
+                  setMaxDepth={setMaxDepth}
+                  maxDepthEnabled={maxDepthEnabled}
+                  setMaxDepthEnabled={setMaxDepthEnabled}
+                  findAllPaths={findAllPaths}
+                  setFindAllPaths={setFindAllPaths}
                   onRun={executeBreedingScript}
                   onClear={clearAll}
                   onLoadMore={handleLoadMore}

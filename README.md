@@ -1,13 +1,20 @@
 # Palworld Breeding Calculator
 
-A comprehensive desktop application for Palworld that helps players find breeding combinations, calculate shortest breeding paths, and manage their breeding progress. Built with Tauri, React, and TypeScript for optimal performance and cross-platform compatibility.
+A comprehensive desktop application for Palworld that helps players find breeding combinations, calculate breeding paths, and manage their breeding progress. Built with Tauri, React, and TypeScript for optimal performance and cross-platform compatibility.
 
 ## 🎯 Features
 
 ### 🔍 Breeding Lookup
 - **Parent Lookup**: Find what child results from breeding two specific Pals
 - **Child Lookup**: Find all possible parent combinations for a desired child
-- **Path Finding**: Calculate the shortest breeding path from any Pal to your target
+- **Path Finding**: Calculate breeding paths from any Pal to your target with multiple algorithms
+
+### 🛣️ Advanced Path Finding
+- **Shortest Paths**: Find the most efficient breeding routes (original algorithm)
+- **All Possible Paths**: Discover every possible breeding path, not just the shortest ones (new algorithm)
+- **Configurable Depth**: Set maximum breeding steps (3-10 steps, default: 5)
+- **Flexible Limits**: Adjust computation time (1-60 seconds, default: 10) and max paths (1-1000, default: 100)
+- **Real-time Progress**: Watch calculations with live progress indicators
 
 ### 📊 Progress Tracking
 - **Real-time Progress**: Watch breeding calculations in real-time with progress bars
@@ -26,6 +33,7 @@ A comprehensive desktop application for Palworld that helps players find breedin
 - **Responsive Design**: Works seamlessly on different screen sizes
 - **Elemental Weaknesses**: Built-in reference chart for type effectiveness
 - **Keyboard Navigation**: Full keyboard support for accessibility
+- **Expandable Results**: Collapsible path display for better organization
 
 ## 🚀 Installation
 
@@ -124,7 +132,7 @@ npm run type-check         # Run TypeScript type checking
 
 The application uses several Python sidecar binaries for data processing:
 
-- **breeding-path**: Calculates shortest breeding paths
+- **breeding-path**: Calculates breeding paths with multiple algorithms
 - **breeding-scraper**: Scrapes breeding combinations from the web
 - **image-scraper**: Downloads and processes Pal images
 - **fullcalc-scraper**: Comprehensive breeding calculations
@@ -139,18 +147,36 @@ These are automatically built and bundled with the application.
 2. **Enter Pals**: Input the names of the Pals you want to breed
 3. **Get Results**: View the breeding combination or path
 
-### Path Finding
+### Advanced Path Finding
 
 1. **Set Parameters**: Choose your starting Pal and target child
-2. **Configure Options**: Set computation time and max paths
-3. **Calculate**: Watch real-time progress as the algorithm finds the shortest path
+2. **Configure Options**:
+   - **Computation Time**: Set how long to search (1s, 3s, 5s, 10s, or custom)
+   - **Max Paths**: Limit the number of paths to find (default: 100)
+   - **Max Depth**: Set maximum breeding steps (3-7 or custom, default: 5)
+   - **Find All Paths**: Toggle between shortest paths only or all possible paths
+3. **Calculate**: Watch real-time progress as the algorithm finds paths
 4. **Save**: Star paths to save them to your favorites
+
+### Path Finding Algorithms
+
+#### Shortest Paths (Default)
+- Finds only the most efficient breeding routes
+- Faster computation
+- Good for quick reference
+
+#### All Possible Paths (New)
+- Discovers every possible breeding path up to the specified depth
+- More comprehensive results
+- Useful for finding alternative breeding strategies
+- Can find longer but potentially easier paths
 
 ### Managing Favorites
 
 - **Save Paths**: Click the star icon on any path to save it
 - **Organize**: Create collections to group related paths
 - **Track Progress**: Mark steps as completed to track your breeding progress
+- **Combine Paths**: Link multiple paths together for complex breeding chains
 
 ## 🔒 Permissions
 
@@ -197,6 +223,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Check your internet connection
 - Verify the data files are in the correct location
 
+**Path Finding Not Finding Expected Paths**
+- Try enabling "Find All Paths" to use the comprehensive algorithm
+- Increase the computation time to allow more thorough searching
+- Increase the max depth to find longer breeding chains
+- Increase the max paths limit to see more alternatives
+
 **Build Errors**
 - Ensure you have the latest Rust toolchain: `rustup update`
 - Clear build cache: `npm run clean && cargo clean`
@@ -216,6 +248,21 @@ If you encounter issues:
 - **RAM**: 4GB minimum, 8GB recommended
 - **Storage**: 500MB free space
 - **Network**: Internet connection for data updates
+
+## 🔄 Recent Updates
+
+### Version 2.0 - Enhanced Path Finding
+- **New Algorithm**: Added "Find All Paths" option to discover every possible breeding route
+- **Configurable Depth**: Set maximum breeding steps from 3 to 10
+- **Improved Defaults**: Better default settings (10s computation time, 100 max paths, 5 max depth)
+- **Enhanced UI**: More intuitive controls for path finding parameters
+- **Better Results**: More comprehensive path discovery, including alternative breeding strategies
+
+### Version 1.0 - Core Features
+- Basic breeding lookup functionality
+- Shortest path finding
+- Favorites and progress tracking
+- Data management tools
 
 ---
 

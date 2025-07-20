@@ -69,6 +69,12 @@ interface HomeProps {
   setMaxPaths: (n: number) => void;
   maxPathsEnabled: boolean;
   setMaxPathsEnabled: (b: boolean) => void;
+  maxDepth: number;
+  setMaxDepth: (n: number) => void;
+  maxDepthEnabled: boolean;
+  setMaxDepthEnabled: (b: boolean) => void;
+  findAllPaths: boolean;
+  setFindAllPaths: (b: boolean) => void;
   onRun: () => void;
   onClear: () => void;
   onLoadMore: () => void;
@@ -85,6 +91,8 @@ const Home: React.FC<HomeProps> = ({
   childLookupTarget, setChildLookupTarget,
   computationTime, setComputationTime, customTime, setCustomTime,
   isLoading, result, maxPaths, setMaxPaths, maxPathsEnabled, setMaxPathsEnabled,
+  maxDepth, setMaxDepth, maxDepthEnabled, setMaxDepthEnabled,
+  findAllPaths, setFindAllPaths,
   onRun, onClear, onLoadMore, onAddToCollection, progress, progressError,
   palList
 }) => {
@@ -286,6 +294,49 @@ const Home: React.FC<HomeProps> = ({
               disabled={!maxPathsEnabled}
             />
             <span className={`text-xs ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>paths</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="checkbox"
+              checked={maxDepthEnabled}
+              onChange={e => setMaxDepthEnabled(e.target.checked)}
+              className="mr-2"
+              theme={isDark ? 'dark' : 'light'}
+            />
+            <span className={`font-medium ${isDark ? 'text-accessible-dark' : 'text-accessible-light'}`}>Max Depth</span>
+            {[3, 4, 5, 6, 7].map((depth) => (
+              <Button
+                key={depth}
+                onClick={() => setMaxDepth(depth)}
+                variant={maxDepth === depth ? 'primary' : 'secondary'}
+                size="sm"
+                dark={isDark}
+                disabled={!maxDepthEnabled}
+              >
+                {depth}
+              </Button>
+            ))}
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={maxDepth}
+              onChange={e => setMaxDepth(Number(e.target.value) || 5)}
+              className="w-16 ml-2"
+              theme={isDark ? 'dark' : 'light'}
+              disabled={!maxDepthEnabled}
+            />
+            <span className={`text-xs ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>steps</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="checkbox"
+              checked={findAllPaths}
+              onChange={e => setFindAllPaths(e.target.checked)}
+              className="mr-2"
+              theme={isDark ? 'dark' : 'light'}
+            />
+            <span className={`font-medium ${isDark ? 'text-accessible-dark' : 'text-accessible-light'}`}>Find All Paths (not just shortest)</span>
           </div>
         </div>
       )}
