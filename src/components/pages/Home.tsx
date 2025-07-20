@@ -63,6 +63,8 @@ interface HomeProps {
   setComputationTime: (n: number) => void;
   customTime: string;
   setCustomTime: (v: string) => void;
+  computationTimeEnabled: boolean;
+  setComputationTimeEnabled: (b: boolean) => void;
   isLoading: boolean;
   result: any;
   maxPaths: number;
@@ -88,6 +90,7 @@ const Home: React.FC<HomeProps> = ({
   pathfindParent1, setPathfindParent1, pathfindTargetChild, setPathfindTargetChild,
   childLookupTarget, setChildLookupTarget,
   computationTime, setComputationTime, customTime, setCustomTime,
+  computationTimeEnabled, setComputationTimeEnabled,
   isLoading, result, maxPaths, setMaxPaths, maxPathsEnabled, setMaxPathsEnabled,
   maxDepth, setMaxDepth, maxDepthEnabled, setMaxDepthEnabled,
   onRun, onClear, onLoadMore, onAddToCollection, progress, progressError,
@@ -247,8 +250,8 @@ const Home: React.FC<HomeProps> = ({
           <div className="flex items-center gap-2">
             <Input
               type="checkbox"
-              checked={true}
-              disabled
+              checked={computationTimeEnabled}
+              onChange={e => setComputationTimeEnabled(e.target.checked)}
               className="mr-2"
               theme={isDark ? 'dark' : 'light'}
             />
@@ -260,6 +263,7 @@ const Home: React.FC<HomeProps> = ({
                 variant={computationTime === sec && !customTime ? 'primary' : 'secondary'}
                 size="sm"
                 dark={isDark}
+                disabled={!computationTimeEnabled}
               >
                 {sec}s
               </Button>
@@ -276,6 +280,7 @@ const Home: React.FC<HomeProps> = ({
               }}
               className="w-20 ml-2"
               theme={isDark ? 'dark' : 'light'}
+              disabled={!computationTimeEnabled}
             />
             <span className={`text-xs ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>seconds</span>
           </div>

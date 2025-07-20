@@ -47,6 +47,7 @@ function AppContent() {
   const [currentSection, setCurrentSection] = useState<SidebarSection>('home');
   const [computationTime, setComputationTime] = useState<number>(10); // Default 10 seconds
   const [customTime, setCustomTime] = useState<string>('');
+  const [computationTimeEnabled, setComputationTimeEnabled] = useState<boolean>(true);
   const [maxPaths, setMaxPaths] = useState<number>(100);
   const [maxPathsEnabled, setMaxPathsEnabled] = useState(true);
   const [maxDepth, setMaxDepth] = useState<number>(5);
@@ -371,10 +372,14 @@ function AppContent() {
 
       // Path finding mode still uses the Python script
       if (mode === 'pathfind') {
-        let maxSeconds = computationTime;
-        if (customTime && !isNaN(Number(customTime))) {
-          maxSeconds = Number(customTime);
+        let maxSeconds: number | undefined;
+        if (computationTimeEnabled) {
+          maxSeconds = computationTime;
+          if (customTime && !isNaN(Number(customTime))) {
+            maxSeconds = Number(customTime);
+          }
         }
+        // If computation time is disabled, maxSeconds remains undefined (no time limit)
         let effectiveMaxPaths: number;
         if (maxPathsEnabled) {
           if (typeof overrideMaxPaths === 'number') {
@@ -400,7 +405,7 @@ function AppContent() {
             args.push('--max-depth', String(maxDepth));
           }
           
-          if (maxSeconds > 0) {
+          if (maxSeconds !== undefined && maxSeconds > 0) {
             args.push('--max-seconds', String(maxSeconds));
           }
 
@@ -834,6 +839,8 @@ function AppContent() {
                   setComputationTime={setComputationTime}
                   customTime={customTime}
                   setCustomTime={setCustomTime}
+                  computationTimeEnabled={computationTimeEnabled}
+                  setComputationTimeEnabled={setComputationTimeEnabled}
                   isLoading={isLoading}
                   result={result}
                   maxPaths={maxPaths}
