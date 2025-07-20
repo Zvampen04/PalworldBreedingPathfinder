@@ -51,7 +51,6 @@ function AppContent() {
   const [maxPathsEnabled, setMaxPathsEnabled] = useState(true);
   const [maxDepth, setMaxDepth] = useState<number>(5);
   const [maxDepthEnabled, setMaxDepthEnabled] = useState(true);
-  const [findAllPaths, setFindAllPaths] = useState<boolean>(false);
   const [progress, setProgress] = useState<{ current: number; max: number; label: string } | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
@@ -393,10 +392,8 @@ function AppContent() {
           let args: string[] = [];
           args = ['-p1', parent1, '-c', targetChild, '--json', '--max-paths', String(effectiveMaxPaths)];
           
-          // Add find-all flag if enabled
-          if (findAllPaths) {
-            args.push('--find-all');
-          }
+          // Always use find-all algorithm
+          args.push('--find-all');
           
           // Add max-depth if enabled
           if (maxDepthEnabled) {
@@ -847,8 +844,6 @@ function AppContent() {
                   setMaxDepth={setMaxDepth}
                   maxDepthEnabled={maxDepthEnabled}
                   setMaxDepthEnabled={setMaxDepthEnabled}
-                  findAllPaths={findAllPaths}
-                  setFindAllPaths={setFindAllPaths}
                   onRun={executeBreedingScript}
                   onClear={clearAll}
                   onLoadMore={handleLoadMore}

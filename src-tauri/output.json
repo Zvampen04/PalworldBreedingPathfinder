@@ -1,0 +1,1015 @@
+{
+  "success": true,
+  "start_parent": "Turtacle Terra",
+  "target_child": "Knocklem",
+  "total_paths": 20,
+  "min_steps": 2,
+  "paths": [
+    {
+      "type": "single",
+      "path": {
+        "id": 0,
+        "steps": [
+          {
+            "type": "start",
+            "pal": "Turtacle Terra",
+            "step_number": 0
+          },
+          {
+            "type": "breed",
+            "parents": "Turtacle Terra + Bellanoir Libero",
+            "result": "Elphidran",
+            "step_number": 1,
+            "is_final": false
+          },
+          {
+            "type": "breed",
+            "parents": "Elphidran + Bellanoir Libero",
+            "result": "Knocklem",
+            "step_number": 2,
+            "is_final": true
+          }
+        ],
+        "total_steps": 2
+      },
+      "alternatives": []
+    },
+    {
+      "type": "group",
+      "common_steps": [
+        {
+          "type": "start",
+          "pal": "Turtacle Terra",
+          "step_number": 0
+        }
+      ],
+      "children": [
+        {
+          "type": "single",
+          "path": {
+            "id": 6,
+            "steps": [
+              {
+                "type": "start",
+                "pal": "Turtacle Terra",
+                "step_number": 0
+              },
+              {
+                "type": "breed",
+                "parents": "Turtacle Terra + Bellanoir",
+                "result": "Elphidran",
+                "step_number": 1,
+                "is_final": false
+              },
+              {
+                "type": "breed",
+                "parents": "Elphidran + Bellanoir Libero",
+                "result": "Knocklem",
+                "step_number": 2,
+                "is_final": true
+              }
+            ],
+            "total_steps": 2
+          },
+          "alternatives": []
+        },
+        {
+          "type": "group",
+          "common_steps": [
+            {
+              "type": "start",
+              "pal": "Turtacle Terra",
+              "step_number": 0
+            },
+            {
+              "type": "breed",
+              "parents": "Turtacle Terra + Bellanoir",
+              "result": "Elphidran",
+              "step_number": 1,
+              "is_final": false
+            }
+          ],
+          "children": [
+            {
+              "type": "single",
+              "path": {
+                "id": 7,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Bellanoir",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            },
+            {
+              "type": "single",
+              "path": {
+                "id": 6,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Bellanoir",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir Libero",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            }
+          ],
+          "count": 2
+        },
+        {
+          "type": "group",
+          "common_steps": [
+            {
+              "type": "start",
+              "pal": "Turtacle Terra",
+              "step_number": 0
+            },
+            {
+              "type": "breed",
+              "parents": "Turtacle Terra + Bellanoir Libero",
+              "result": "Elphidran",
+              "step_number": 1,
+              "is_final": false
+            }
+          ],
+          "children": [
+            {
+              "type": "single",
+              "path": {
+                "id": 1,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Bellanoir Libero",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            },
+            {
+              "type": "single",
+              "path": {
+                "id": 0,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Bellanoir Libero",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir Libero",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            }
+          ],
+          "count": 2
+        },
+        {
+          "type": "group",
+          "common_steps": [
+            {
+              "type": "start",
+              "pal": "Turtacle Terra",
+              "step_number": 0
+            },
+            {
+              "type": "breed",
+              "parents": "Turtacle Terra + Blazamut",
+              "result": "Elphidran",
+              "step_number": 1,
+              "is_final": false
+            }
+          ],
+          "children": [
+            {
+              "type": "single",
+              "path": {
+                "id": 5,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Blazamut",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            },
+            {
+              "type": "single",
+              "path": {
+                "id": 4,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Blazamut",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir Libero",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            }
+          ],
+          "count": 2
+        },
+        {
+          "type": "group",
+          "common_steps": [
+            {
+              "type": "start",
+              "pal": "Turtacle Terra",
+              "step_number": 0
+            },
+            {
+              "type": "breed",
+              "parents": "Turtacle Terra + Blazamut Ryu",
+              "result": "Elphidran",
+              "step_number": 1,
+              "is_final": false
+            }
+          ],
+          "children": [
+            {
+              "type": "single",
+              "path": {
+                "id": 3,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Blazamut Ryu",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            },
+            {
+              "type": "single",
+              "path": {
+                "id": 2,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Blazamut Ryu",
+                    "result": "Elphidran",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Elphidran + Bellanoir Libero",
+                    "result": "Knocklem",
+                    "step_number": 2,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 2
+              },
+              "alternatives": []
+            }
+          ],
+          "count": 2
+        },
+        {
+          "type": "group",
+          "common_steps": [
+            {
+              "type": "start",
+              "pal": "Turtacle Terra",
+              "step_number": 0
+            },
+            {
+              "type": "breed",
+              "parents": "Turtacle Terra + Splatterina",
+              "result": "Dumud",
+              "step_number": 1,
+              "is_final": false
+            }
+          ],
+          "children": [
+            {
+              "type": "single",
+              "path": {
+                "id": 16,
+                "steps": [
+                  {
+                    "type": "start",
+                    "pal": "Turtacle Terra",
+                    "step_number": 0
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Turtacle Terra + Splatterina",
+                    "result": "Dumud",
+                    "step_number": 1,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Dumud + Cryolinx Terra",
+                    "result": "Ghangler",
+                    "step_number": 2,
+                    "is_final": false
+                  },
+                  {
+                    "type": "breed",
+                    "parents": "Ghangler + Bellanoir Libero",
+                    "result": "Knocklem",
+                    "step_number": 3,
+                    "is_final": true
+                  }
+                ],
+                "total_steps": 3
+              },
+              "alternatives": []
+            },
+            {
+              "type": "group",
+              "common_steps": [
+                {
+                  "type": "start",
+                  "pal": "Turtacle Terra",
+                  "step_number": 0
+                },
+                {
+                  "type": "breed",
+                  "parents": "Turtacle Terra + Splatterina",
+                  "result": "Dumud",
+                  "step_number": 1,
+                  "is_final": false
+                },
+                {
+                  "type": "breed",
+                  "parents": "Dumud + Cryolinx Terra",
+                  "result": "Ghangler",
+                  "step_number": 2,
+                  "is_final": false
+                }
+              ],
+              "children": [
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 19,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Cryolinx Terra",
+                        "result": "Ghangler",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Ghangler + Bellanoir",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 16,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Cryolinx Terra",
+                        "result": "Ghangler",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Ghangler + Bellanoir Libero",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 18,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Cryolinx Terra",
+                        "result": "Ghangler",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Ghangler + Blazamut",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 17,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Cryolinx Terra",
+                        "result": "Ghangler",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Ghangler + Blazamut Ryu",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                }
+              ],
+              "count": 4
+            },
+            {
+              "type": "group",
+              "common_steps": [
+                {
+                  "type": "start",
+                  "pal": "Turtacle Terra",
+                  "step_number": 0
+                },
+                {
+                  "type": "breed",
+                  "parents": "Turtacle Terra + Splatterina",
+                  "result": "Dumud",
+                  "step_number": 1,
+                  "is_final": false
+                },
+                {
+                  "type": "breed",
+                  "parents": "Dumud + Helzephyr Lux",
+                  "result": "Elphidran",
+                  "step_number": 2,
+                  "is_final": false
+                }
+              ],
+              "children": [
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 15,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Helzephyr Lux",
+                        "result": "Elphidran",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Elphidran + Bellanoir",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 14,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Helzephyr Lux",
+                        "result": "Elphidran",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Elphidran + Bellanoir Libero",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                }
+              ],
+              "count": 2
+            },
+            {
+              "type": "group",
+              "common_steps": [
+                {
+                  "type": "start",
+                  "pal": "Turtacle Terra",
+                  "step_number": 0
+                },
+                {
+                  "type": "breed",
+                  "parents": "Turtacle Terra + Splatterina",
+                  "result": "Dumud",
+                  "step_number": 1,
+                  "is_final": false
+                },
+                {
+                  "type": "breed",
+                  "parents": "Dumud + Necromus",
+                  "result": "Wumpo Botan",
+                  "step_number": 2,
+                  "is_final": false
+                }
+              ],
+              "children": [
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 12,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Necromus",
+                        "result": "Wumpo Botan",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Wumpo Botan + Shadowbeak",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 13,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Necromus",
+                        "result": "Wumpo Botan",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Wumpo Botan + Suzaku",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                }
+              ],
+              "count": 2
+            },
+            {
+              "type": "group",
+              "common_steps": [
+                {
+                  "type": "start",
+                  "pal": "Turtacle Terra",
+                  "step_number": 0
+                },
+                {
+                  "type": "breed",
+                  "parents": "Turtacle Terra + Splatterina",
+                  "result": "Dumud",
+                  "step_number": 1,
+                  "is_final": false
+                },
+                {
+                  "type": "breed",
+                  "parents": "Dumud + Shadowbeak",
+                  "result": "Wumpo Botan",
+                  "step_number": 2,
+                  "is_final": false
+                }
+              ],
+              "children": [
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 8,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Shadowbeak",
+                        "result": "Wumpo Botan",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Wumpo Botan + Shadowbeak",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 9,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Shadowbeak",
+                        "result": "Wumpo Botan",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Wumpo Botan + Suzaku",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                }
+              ],
+              "count": 2
+            },
+            {
+              "type": "group",
+              "common_steps": [
+                {
+                  "type": "start",
+                  "pal": "Turtacle Terra",
+                  "step_number": 0
+                },
+                {
+                  "type": "breed",
+                  "parents": "Turtacle Terra + Splatterina",
+                  "result": "Dumud",
+                  "step_number": 1,
+                  "is_final": false
+                },
+                {
+                  "type": "breed",
+                  "parents": "Dumud + Suzaku",
+                  "result": "Kingpaca",
+                  "step_number": 2,
+                  "is_final": false
+                }
+              ],
+              "children": [
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 11,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Suzaku",
+                        "result": "Kingpaca",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Kingpaca + Necromus",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                },
+                {
+                  "type": "single",
+                  "path": {
+                    "id": 10,
+                    "steps": [
+                      {
+                        "type": "start",
+                        "pal": "Turtacle Terra",
+                        "step_number": 0
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Turtacle Terra + Splatterina",
+                        "result": "Dumud",
+                        "step_number": 1,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Dumud + Suzaku",
+                        "result": "Kingpaca",
+                        "step_number": 2,
+                        "is_final": false
+                      },
+                      {
+                        "type": "breed",
+                        "parents": "Kingpaca + Shadowbeak",
+                        "result": "Knocklem",
+                        "step_number": 3,
+                        "is_final": true
+                      }
+                    ],
+                    "total_steps": 3
+                  },
+                  "alternatives": []
+                }
+              ],
+              "count": 2
+            }
+          ],
+          "count": 12
+        }
+      ],
+      "count": 20
+    }
+  ]
+}
